@@ -1,0 +1,9 @@
+# Ignore large files
+*.mov
+*.mp4
+*.avi
+*.db
+__pycache__/
+*.pyc
+backend/static/uploads/
+venv/

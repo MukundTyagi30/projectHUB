@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Tasks | ProjectHub</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6610f2',
+            secondary: '#e84393',
+            accent: '#00cec9',
+            success: '#00b894',
+            warning: '#fdcb6e',
+            danger: '#d63031',
+            dark: '#18191a',
+            'dark-card': 'rgba(14, 14, 18, 0.8)',
+            'text-light': '#e1e2e5',
+            'text-dim': '#a8a9ad',
+          },
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+          },
+          boxShadow: {
+            card: '0 20px 50px rgba(0, 0, 0, 0.5)',
+            button: '0 10px 20px rgba(102, 16, 242, 0.3)',
+          },
+          backgroundImage: {
+            'gradient-primary': 'linear-gradient(45deg, var(--tw-gradient-from), var(--tw-gradient-to))',
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite',
+            'spin-slow': 'spin 15s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%, 100%': { filter: 'brightness(1)' },
+              '50%': { filter: 'brightness(1.2)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Base styles that match the existing theme */
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .bg-space {
+      background-color: #18191a;
+      background-image: radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.2), transparent 25%),
+                        radial-gradient(circle at 30% 20%, rgba(232, 67, 147, 0.2), transparent 25%),
+                        radial-gradient(circle at 90% 30%, rgba(0, 206, 201, 0.2), transparent 20%);
+    }
+    
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+      animation: float 10s linear infinite;
+      opacity: 0.5;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+      }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Glass card effect */
+    .glass-card {
+      background-color: rgba(14, 14, 18, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+    }
+    
+    /* Kanban board styles */
+    .kanban-column {
+      min-height: 70vh;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    .task-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .task-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Status indicators */
+    .status-todo {
+      background: linear-gradient(135deg, #6610f2 0%, #6610f2 100%);
+    }
+    
+    .status-progress {
+      background: linear-gradient(135deg, #00cec9 0%, #00cec9 100%);
+    }
+    
+    .status-review {
+      background: linear-gradient(135deg, #fdcb6e 0%, #fdcb6e 100%);
+    }
+    
+    .status-completed {
+      background: linear-gradient(135deg, #00b894 0%, #00b894 100%);
+    }
+    
+    /* Sidebar styles */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-space min-h-screen">
+  <!-- Noise overlay -->
+  <div class="noise-overlay"></div>
+  
+  <!-- Animated background particles will be added via JavaScript -->
+  <div id="particles-container" class="fixed inset-0 z-0"></div>
+
+  <!-- Mobile Menu Button (visible on small screens) -->
+  <button id="mobile-menu-button" class="fixed z-50 bottom-4 left-4 md:hidden bg-primary text-white p-3 rounded-full shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <!-- Left Sidebar (fixed) -->
+  <div class="sidebar fixed left-0 top-0 bottom-0 w-64 bg-dark-card border border-gray-800 text-text-light shadow-lg z-40 md:translate-x-0">
+    <!-- Project Name at top -->
+    <div class="p-4 border-b border-gray-800">
+      <h1 id="project-name" class="text-xl font-bold gradient-text">Project Name</h1>
+      <p class="text-text-dim text-sm">Project Management</p>
+    </div>
+    
+    <!-- Navigation Links -->
+    <nav class="mt-6">
+      <ul>
+        <li>
+          <a href="#" id="go-to-overview" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Overview
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 bg-primary/20 hover:bg-primary/30 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Tasks
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition" onclick="navigateToDocuments()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Documents
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Timeline
+          </a>
+        </li>
+        <li>
+          <a href="#" id="chat-link" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Chat
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            Feedback
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="relative z-10 md:ml-64 min-h-screen">
+    <!-- Top Bar -->
+    <div class="glass-card sticky top-0 border border-gray-800 shadow-lg z-30">
+      <div class="px-4 py-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl text-text-light font-semibold" id="project-title">Project Tasks</h2>
+          <p class="text-sm text-text-dim">Manage and track project tasks</p>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4">
+          <!-- Search Input -->
+          <div class="relative w-full md:w-auto">
+            <input type="text" placeholder="Search tasks..." class="w-full md:w-64 bg-gray-800/50 text-text-light border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-text-dim" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Sort Dropdown -->
+          <div class="relative w-full md:w-auto">
+            <select class="w-full md:w-auto bg-gray-800/50 text-text-light border border-gray-700 rounded-lg px-4 py-2 appearance-none focus:outline-none focus:ring-1 focus:ring-primary">
+              <option value="dueDate">Sort by: Due Date</option>
+              <option value="priority">Sort by: Priority</option>
+              <option value="status">Sort by: Status</option>
+              <option value="assignee">Sort by: Assignee</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-text-dim" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          
+          <!-- New Task Button -->
+          <button id="new-task-button" class="w-full md:w-auto rounded-lg bg-primary hover:bg-primary/90 text-white py-2 px-4 text-sm flex items-center justify-center shadow-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            New Task
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Kanban Board -->
+    <div class="p-4 md:p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- To Do Column -->
+        <div class="glass-card border border-gray-800 shadow-card p-4">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 rounded-full status-todo mr-2"></div>
+            <h3 class="text-text-light font-medium">To Do</h3>
+            <span id="todo-column-count" class="ml-auto bg-gray-800 text-text-dim text-xs py-1 px-2 rounded">3</span>
+          </div>
+          
+          <div class="kanban-column space-y-3" id="todo-column">
+            <!-- Sample Task Cards for To Do -->
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-primary/30" onclick="openTaskModal(1)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">Create wireframes for dashboard</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-primary/20 text-primary">High</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Design and create wireframes for the new dashboard interface with mobile responsiveness.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">JS</div>
+                </div>
+                <span class="text-xs text-warning">Due Apr 15</span>
+              </div>
+            </div>
+            
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-primary/30" onclick="openTaskModal(2)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">Research competitors</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-accent/20 text-accent">Medium</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Analyze top 5 competitors and create a report on their features and pricing strategies.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs">AK</div>
+                </div>
+                <span class="text-xs text-warning">Due Apr 18</span>
+              </div>
+            </div>
+            
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-primary/30" onclick="openTaskModal(3)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">Define user personas</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-accent/20 text-accent">Medium</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Create detailed user personas based on market research and user interviews.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-success/20 flex items-center justify-center text-success text-xs">MT</div>
+                </div>
+                <span class="text-xs text-warning">Due Apr 20</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="glass-card border border-gray-800 shadow-card p-4">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 rounded-full status-progress mr-2"></div>
+            <h3 class="text-text-light font-medium">In Progress</h3>
+            <span id="progress-column-count" class="ml-auto bg-gray-800 text-text-dim text-xs py-1 px-2 rounded">2</span>
+          </div>
+          
+          <div class="kanban-column space-y-3" id="progress-column">
+            <!-- Sample Task Cards for In Progress -->
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-accent/30" onclick="openTaskModal(4)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">Implement authentication</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-primary/20 text-primary">High</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Set up authentication system with social login options and email verification.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">RD</div>
+                </div>
+                <span class="text-xs text-warning">Due Apr 12</span>
+              </div>
+              <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                <div class="bg-accent h-full rounded-full" style="width: 60%"></div>
+              </div>
+            </div>
+            
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-accent/30" onclick="openTaskModal(5)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">Design marketing materials</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-accent/20 text-accent">Medium</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Create email templates, social media graphics, and landing page assets.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-warning/20 flex items-center justify-center text-warning text-xs">LK</div>
+                </div>
+                <span class="text-xs text-warning">Due Apr 14</span>
+              </div>
+              <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                <div class="bg-accent h-full rounded-full" style="width: 35%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Review Column -->
+        <div class="glass-card border border-gray-800 shadow-card p-4">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 rounded-full status-review mr-2"></div>
+            <h3 class="text-text-light font-medium">In Review</h3>
+            <span id="review-column-count" class="ml-auto bg-gray-800 text-text-dim text-xs py-1 px-2 rounded">1</span>
+          </div>
+          
+          <div class="kanban-column space-y-3" id="review-column">
+            <!-- Sample Task Card for Review -->
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-warning/30" onclick="openTaskModal(6)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light">API documentation</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-accent/20 text-accent">Medium</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2">Complete API documentation with examples and usage guidelines.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">TJ</div>
+                  <div class="h-6 w-6 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs">MC</div>
+                </div>
+                <span class="text-xs text-success">Ready for review</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Completed Column -->
+        <div class="glass-card border border-gray-800 shadow-card p-4">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 rounded-full status-completed mr-2"></div>
+            <h3 class="text-text-light font-medium">Completed</h3>
+            <span id="completed-column-count" class="ml-auto bg-gray-800 text-text-dim text-xs py-1 px-2 rounded">2</span>
+          </div>
+          
+          <div class="kanban-column space-y-3" id="completed-column">
+            <!-- Sample Task Cards for Completed -->
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-success/30 opacity-75" onclick="openTaskModal(7)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light line-through">Setup project repository</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-success/20 text-success">Done</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2 line-through">Initialize git repository and set up project structure with initial README.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">MT</div>
+                </div>
+                <span class="text-xs text-success">Completed Apr 5</span>
+              </div>
+            </div>
+            
+            <div class="task-card glass-card border border-gray-800 p-3 hover:border-success/30 opacity-75" onclick="openTaskModal(8)">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-sm font-medium text-text-light line-through">Create project plan</h4>
+                <div class="ml-2 px-2 py-0.5 text-xs rounded bg-success/20 text-success">Done</div>
+              </div>
+              <p class="text-xs text-text-dim mb-3 line-clamp-2 line-through">Draft detailed project plan with milestones, resources, and timeline.</p>
+              <div class="flex justify-between items-center">
+                <div class="flex -space-x-2">
+                  <div class="h-6 w-6 rounded-full bg-warning/20 flex items-center justify-center text-warning text-xs">PM</div>
+                </div>
+                <span class="text-xs text-success">Completed Apr 2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Task Detail Modal -->
+  <div id="task-detail-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+      <div class="glass-card border border-gray-800 rounded-xl p-6 max-w-2xl w-full shadow-lg relative">
+        <!-- Close Button -->
+        <button class="absolute top-4 right-4 text-gray-400 hover:text-white close-modal">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <!-- Task Header -->
+        <div class="mb-6">
+          <div class="flex justify-between items-start">
+            <h3 id="task-title" class="text-xl font-semibold text-text-light">Create wireframes for dashboard</h3>
+            <div id="task-priority" class="ml-2 px-2 py-0.5 text-xs rounded bg-primary/20 text-primary">High</div>
+          </div>
+          <div class="flex items-center mt-2 text-sm text-text-dim">
+            <span id="task-date">Created on Apr 5, 2023</span>
+            <span class="mx-2">•</span>
+            <span id="task-due-date">Due Apr 15, 2023</span>
+          </div>
+        </div>
+        
+        <!-- Task Content -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Left Column: Description and Checklist -->
+          <div class="md:col-span-2 space-y-6">
+            <!-- Description -->
+            <div>
+              <h4 class="text-md font-medium text-text-light mb-2">Description</h4>
+              <p id="task-description" class="text-text-dim">
+                Design and create wireframes for the new dashboard interface with mobile responsiveness. The wireframes should include all the key components:
+                <br><br>
+                - Main dashboard overview<br>
+                - Project list view<br>
+                - Project detail view<br>
+                - Task management interface<br>
+                - User settings panel<br>
+                <br>
+                Each view should be designed for desktop, tablet, and mobile layouts.
+              </p>
+            </div>
+            
+            <!-- Checklist -->
+            <div>
+              <h4 class="text-md font-medium text-text-light mb-2">Checklist</h4>
+              <ul class="space-y-2" id="task-checklist">
+                <li class="flex items-center">
+                  <input type="checkbox" checked class="mr-2 rounded border-gray-700 bg-gray-800 text-primary">
+                  <span class="text-text-dim line-through">Research dashboard layouts</span>
+                </li>
+                <li class="flex items-center">
+                  <input type="checkbox" checked class="mr-2 rounded border-gray-700 bg-gray-800 text-primary">
+                  <span class="text-text-dim line-through">Create wireframe sketches</span>
+                </li>
+                <li class="flex items-center">
+                  <input type="checkbox" class="mr-2 rounded border-gray-700 bg-gray-800 text-primary">
+                  <span class="text-text-light">Design desktop views in Figma</span>
+                </li>
+                <li class="flex items-center">
+                  <input type="checkbox" class="mr-2 rounded border-gray-700 bg-gray-800 text-primary">
+                  <span class="text-text-light">Design mobile views in Figma</span>
+                </li>
+                <li class="flex items-center">
+                  <input type="checkbox" class="mr-2 rounded border-gray-700 bg-gray-800 text-primary">
+                  <span class="text-text-light">Create interactive prototype</span>
+                </li>
+              </ul>
+              <div class="mt-3 flex">
+                <input type="text" placeholder="Add new item..." class="flex-1 bg-gray-800/50 border-gray-700 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-text-light text-sm">
+                <button class="bg-primary hover:bg-primary/90 text-white px-3 rounded-r-lg shadow-button text-sm">Add</button>
+              </div>
+            </div>
+            
+            <!-- Attachments -->
+            <div>
+              <h4 class="text-md font-medium text-text-light mb-2">Attachments</h4>
+              <div class="space-y-2" id="task-attachments">
+                <div class="flex items-center p-2 bg-gray-800/30 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-text-light text-sm">dashboard-requirements.pdf</p>
+                    <p class="text-text-dim text-xs">458 KB • Added Apr 7</p>
+                  </div>
+                  <button class="text-primary hover:text-primary/80 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div class="flex items-center p-2 bg-gray-800/30 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-text-light text-sm">dashboard-inspiration.jpg</p>
+                    <p class="text-text-dim text-xs">1.2 MB • Added Apr 6</p>
+                  </div>
+                  <button class="text-primary hover:text-primary/80 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-3">
+                <button class="flex items-center text-primary hover:text-primary/80 text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Attachment
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column: Status, Assignee, Comments -->
+          <div class="space-y-6">
+            <!-- Status and Actions -->
+            <div class="bg-gray-800/30 p-4 rounded-lg space-y-4">
+              <div>
+                <h5 class="text-sm text-text-dim mb-1">Status</h5>
+                <select class="w-full bg-gray-800/50 text-text-light border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-sm">
+                  <option value="todo">To Do</option>
+                  <option value="progress">In Progress</option>
+                  <option value="review">Under Review</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              
+              <div>
+                <h5 class="text-sm text-text-dim mb-1">Assignee</h5>
+                <div class="flex items-center px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg">
+                  <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2">JS</div>
+                  <span class="text-text-light text-sm">John Smith</span>
+                </div>
+              </div>
+              
+              <div>
+                <h5 class="text-sm text-text-dim mb-1">Priority</h5>
+                <select class="w-full bg-gray-800/50 text-text-light border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-sm">
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              
+              <div class="flex space-x-2 pt-2">
+                <button class="flex-1 bg-primary hover:bg-primary/90 text-white py-2 px-4 text-sm rounded-lg shadow-button">
+                  Edit Task
+                </button>
+                <button class="flex-1 bg-success hover:bg-success/90 text-white py-2 px-4 text-sm rounded-lg shadow-lg">
+                  Mark Done
+                </button>
+              </div>
+            </div>
+            
+            <!-- Comments -->
+            <div>
+              <h4 class="text-md font-medium text-text-light mb-2">Comments</h4>
+              <div class="space-y-4" id="task-comments">
+                <div class="bg-gray-800/30 p-3 rounded-lg">
+                  <div class="flex items-start mb-1">
+                    <div class="h-6 w-6 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs mr-2">AK</div>
+                    <div>
+                      <p class="text-text-light text-sm">Anna King</p>
+                      <p class="text-text-dim text-xs">2 days ago</p>
+                    </div>
+                  </div>
+                  <p class="text-text-dim text-sm">I've shared some examples in the attachments that we can use for inspiration.</p>
+                </div>
+                
+                <div class="bg-gray-800/30 p-3 rounded-lg">
+                  <div class="flex items-start mb-1">
+                    <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2">JS</div>
+                    <div>
+                      <p class="text-text-light text-sm">John Smith</p>
+                      <p class="text-text-dim text-xs">1 day ago</p>
+                    </div>
+                  </div>
+                  <p class="text-text-dim text-sm">Thanks! I'll take a look and start on the desktop layouts first.</p>
+                </div>
+              </div>
+              
+              <div class="mt-3">
+                <textarea placeholder="Add a comment..." class="w-full bg-gray-800/50 border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-text-light text-sm min-h-[80px]"></textarea>
+                <div class="flex justify-end mt-2">
+                  <button class="bg-primary hover:bg-primary/90 text-white py-1.5 px-4 text-sm rounded-lg shadow-button">
+                    Comment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Sidebar -->
+  <div id="chat-sidebar" class="fixed top-0 right-0 h-screen w-96 bg-dark-card border-l border-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50">
+    <div class="flex flex-col h-full">
+      <!-- Chat Header -->
+      <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-text-light">Project Chat</h3>
+        <button id="close-chat" class="text-text-dim hover:text-text-light p-2" onclick="closeChatSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Chat Messages -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+        <!-- Sample Messages -->
+        <div class="flex items-start">
+          <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2 flex-shrink-0">JS</div>
+          <div class="glass-card border border-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+            <div class="text-xs text-text-dim mb-1">John Smith</div>
+            <p class="text-sm text-text-light">Hey team, I've started working on the wireframes for the dashboard.</p>
+            <div class="text-xs text-text-dim mt-1 text-right">10:30 AM</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start justify-end">
+          <div class="glass-card border border-primary/30 bg-primary/10 p-3 rounded-lg rounded-tr-none max-w-[85%]">
+            <p class="text-sm text-text-light">Great! Looking forward to seeing them. When do you think they'll be ready?</p>
+            <div class="text-xs text-text-dim mt-1 text-right">10:32 AM</div>
+          </div>
+          <div class="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs ml-2 flex-shrink-0">ME</div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2 flex-shrink-0">JS</div>
+          <div class="glass-card border border-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+            <div class="text-xs text-text-dim mb-1">John Smith</div>
+            <p class="text-sm text-text-light">I should have the first draft by tomorrow. I'll share them in our next meeting.</p>
+            <div class="text-xs text-text-dim mt-1 text-right">10:35 AM</div>
+          </div>
+        </div>
+        
+        <div class="text-center text-xs text-text-dim my-4">Yesterday</div>
+        
+        <div class="flex items-start">
+          <div class="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xs mr-2 flex-shrink-0">AK</div>
+          <div class="glass-card border border-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+            <div class="text-xs text-text-dim mb-1">Anna King</div>
+            <p class="text-sm text-text-light">@all Meeting at 2 PM today to discuss project progress. Please prepare your updates.</p>
+            <div class="text-xs text-text-dim mt-1 text-right">9:15 AM</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Input -->
+      <div class="p-4 border-t border-gray-800">
+        <div class="flex items-center">
+          <input type="text" placeholder="Type a message..." class="flex-1 bg-gray-800/50 text-text-light border border-gray-700 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary">
+          <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add particles to background
+    function createParticles() {
+      const container = document.getElementById('particles-container');
+      const particleCount = 50;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 2-6px
+        const size = Math.random() * 4 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        
+        // Random animation duration between 10-20s
+        const duration = Math.random() * 10 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay so they don't all move at once
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        
+        container.appendChild(particle);
+      }
+    }
+    
+    // Get URL parameter by name
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Open task detail modal
+    function openTaskModal(taskId) {
+      const modal = document.getElementById('task-detail-modal');
+      if (!modal) return;
+      
+      modal.classList.remove('hidden');
+      
+      console.log(`Opening task details for task ID: ${taskId}`);
+      
+      // Find the task data from our loaded tasks
+      fetchTaskDetails(taskId);
+    }
+    
+    // Fetch and display task details
+    async function fetchTaskDetails(taskId) {
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+          console.error('No authentication token found');
+          return;
+        }
+        
+        // Show loading state in the modal
+        const modalContent = document.querySelector('#task-detail-modal .task-details');
+        if (modalContent) {
+          modalContent.innerHTML = `
+            <div class="animate-pulse space-y-4">
+              <div class="h-6 bg-gray-700 rounded w-3/4"></div>
+              <div class="h-4 bg-gray-700 rounded w-1/2"></div>
+              <div class="space-y-2">
+                <div class="h-3 bg-gray-700 rounded w-full"></div>
+                <div class="h-3 bg-gray-700 rounded w-full"></div>
+                <div class="h-3 bg-gray-700 rounded w-3/4"></div>
+              </div>
+            </div>
+          `;
+        }
+        
+        // Try to find the task in the existing data first
+        const existingTask = findTaskInDOM(taskId);
+        
+        if (existingTask) {
+          displayTaskInModal(existingTask);
+          return;
+        }
+        
+        // If not found in DOM, fetch from API
+        const projectId = getQueryParam('id');
+        if (!projectId) {
+          showAlert('Project ID is missing', 'error');
+          return;
+        }
+        
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            showAlert('Task not found', 'error');
+          } else {
+            showAlert(`Error loading task: ${response.status}`, 'error');
+          }
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.task) {
+          displayTaskInModal(data.task);
+        } else {
+          showAlert('Failed to load task details', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching task details:', error);
+        showAlert(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    // Find task data from DOM
+    function findTaskInDOM(taskId) {
+      // Convert taskId to string for comparison
+      taskId = taskId.toString();
+      
+      // Create a dummy object to hold the task data
+      let taskData = null;
+      
+      // Find the task card in the DOM
+      const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+      if (!taskCard) return null;
+      
+      // Extract task info from the card
+      const title = taskCard.querySelector('h4')?.textContent || '';
+      const description = taskCard.querySelector('p')?.textContent || '';
+      const priority = taskCard.querySelector('[class*="px-2"][class*="py-0.5"][class*="text-xs"][class*="rounded"]')?.textContent || 'Medium';
+      
+      // Find which column it's in to determine status
+      let status = 'To Do';
+      if (taskCard.closest('#progress-column')) status = 'In Progress';
+      else if (taskCard.closest('#review-column')) status = 'In Review';
+      else if (taskCard.closest('#completed-column')) status = 'Completed';
+      
+      // Get due date
+      const dueDateEl = taskCard.querySelector('.text-xs.text-warning, .text-xs.text-danger');
+      let dueDate = '';
+      if (dueDateEl) {
+        const dueDateText = dueDateEl.textContent;
+        dueDate = dueDateText.replace('Due ', '');
+      }
+      
+      // Get assignee
+      const assigneeInitial = taskCard.querySelector('.rounded-full.flex.items-center.justify-center.text-xs')?.textContent || '';
+      
+      return {
+        id: taskId,
+        title: title,
+        description: description,
+        priority: priority,
+        status: status,
+        dueDate: dueDate,
+        assigneeInitial: assigneeInitial,
+        // We don't have the full assignee name, but we'll display the initial
+      };
+    }
+    
+    // Display task in the modal
+    function displayTaskInModal(task) {
+      const modalContent = document.querySelector('#task-detail-modal .task-details');
+      if (!modalContent) return;
+      
+      // Status class for the badge
+      let statusClass = '';
+      switch(task.status) {
+        case 'In Progress':
+          statusClass = 'bg-accent/20 text-accent';
+          break;
+        case 'In Review':
+          statusClass = 'bg-warning/20 text-warning';
+          break;
+        case 'Completed':
+          statusClass = 'bg-success/20 text-success';
+          break;
+        default:
+          statusClass = 'bg-primary/20 text-primary';
+      }
+      
+      // Priority class
+      const priorityClass = getPriorityClass(task.priority);
+      
+      // Formatted date
+      let formattedDueDate = 'Not set';
+      
+      if (task.dueDate) {
+        try {
+          // Handle different date formats
+          if (typeof task.dueDate === 'string') {
+            // Try to parse the date string
+            const date = new Date(task.dueDate);
+            if (!isNaN(date.getTime())) {
+              formattedDueDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              });
+            }
+          } else if (task.dueDate instanceof Date) {
+            formattedDueDate = task.dueDate.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            });
+          }
+        } catch (e) {
+          console.warn('Error formatting date:', e);
+        }
+      }
+      
+      modalContent.innerHTML = `
+        <div>
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-text-light">${task.title}</h3>
+          </div>
+          
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+              ${task.status || 'To Do'}
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+              ${task.priority || 'Medium'} Priority
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-text-dim">
+              Due: ${formattedDueDate || 'Not set'}
+            </span>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="text-sm font-medium text-text-light mb-2">Description</h4>
+            <p class="text-text-dim">${task.description || 'No description provided.'}</p>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="text-sm font-medium text-text-light mb-2">Assigned to</h4>
+            ${task.assignee ? `
+            <div class="flex items-center">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium mr-3">
+                ${task.assigneeInitial || task.assignee.charAt(0)}
+              </div>
+              <div class="text-text-light">${task.assignee}</div>
+            </div>
+            ` : '<p class="text-text-dim">No one assigned</p>'}
+          </div>
+          
+          <div class="mt-8 flex justify-end gap-3">
+            ${task.status !== 'Completed' ? `
+            <button class="px-4 py-2 rounded-lg bg-success/20 text-success hover:bg-success/30 transition">
+              Mark as Complete
+            </button>
+            ` : ''}
+            <button class="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white transition">
+              Edit Task
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Add event listeners to buttons
+      const completeButton = modalContent.querySelector('.bg-success\\/20');
+      if (completeButton) {
+        completeButton.addEventListener('click', () => markTaskComplete(task.id));
+      }
+      
+      const editButton = modalContent.querySelector('.bg-primary');
+      if (editButton) {
+        editButton.addEventListener('click', () => editTask(task.id));
+      }
+    }
+    
+    // Mark task as complete
+    function markTaskComplete(taskId) {
+      console.log(`Marking task ${taskId} as complete`);
+      // This would normally call the API to update the task status
+      showAlert('This feature is not yet implemented', 'info');
+    }
+    
+    // Edit task
+    function editTask(taskId) {
+      console.log(`Editing task ${taskId}`);
+      // This would normally open a form to edit the task
+      showAlert('This feature is not yet implemented', 'info');
+    }
+    
+    // Close task detail modal
+    function closeTaskModal() {
+      const modal = document.getElementById('task-detail-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('DOMContentLoaded event fired in tasks.html');
+      // Create background particles
+      createParticles();
+      
+      // Get project ID from URL
+      const projectId = getQueryParam('id') || getQueryParam('project_id');
+      if (projectId) {
+        console.log('Project ID found in URL:', projectId);
+        loadProjectData(projectId);
+      } else {
+        console.error('Project ID is missing from the URL, params:', window.location.search);
+        showAlert('Project ID is missing from the URL', 'error');
+      }
+      
+      // Setup event listeners
+      console.log('About to call setupEventListeners in tasks.html');
+      setupEventListeners();
+      console.log('setupEventListeners called in tasks.html');
+    });
+    
+    // Setup all event listeners
+    function setupEventListeners() {
+      console.log('Inside setupEventListeners function in tasks.html');
+      // Mobile menu button
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const sidebar = document.querySelector('.sidebar');
+      
+      if (mobileMenuButton && sidebar) {
+        mobileMenuButton.addEventListener('click', function() {
+          sidebar.classList.toggle('active');
+        });
+      }
+      
+      // New task button
+      const newTaskButton = document.getElementById('new-task-button');
+      if (newTaskButton) {
+        newTaskButton.addEventListener('click', function() {
+          // Here you would open the new task form
+          alert('New task form would open here');
+        });
+      }
+      
+      // Close modal buttons
+      const closeButtons = document.querySelectorAll('.close-modal');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', closeTaskModal);
+      });
+      
+      // Close modal with escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeTaskModal();
+          closeChatSidebar();
+        }
+      });
+      
+      // Go to overview link
+      const overviewLink = document.getElementById('go-to-overview');
+      if (overviewLink) {
+        overviewLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          navigateToOverview();
+        });
+      }
+      
+      // Chat link
+      const chatLink = document.getElementById('chat-link');
+      console.log('Chat link element:', chatLink);
+      if (chatLink) {
+        chatLink.addEventListener('click', function(e) {
+          console.log('Chat link clicked');
+          e.preventDefault();
+          openChatSidebar();
+        });
+      } else {
+        console.error('Chat link not found in the DOM');
+      }
+      
+      // Close chat button
+      const closeChat = document.getElementById('close-chat');
+      console.log('Close chat button:', closeChat);
+      if (closeChat) {
+        closeChat.addEventListener('click', function() {
+          console.log('Close chat button clicked');
+          closeChatSidebar();
+        });
+      } else {
+        console.error('Close chat button not found in the DOM');
+      }
+    }
+    
+    // Load project data from API
+    async function loadProjectData(projectId) {
+      try {
+        // Get token from localStorage or sessionStorage
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+          console.error('No authentication token found');
+          showAlert('You need to log in to view this project', 'error');
+          setTimeout(() => {
+            window.location.href = 'creative-login.html';
+          }, 1500);
+          return;
+        }
+
+        // Display loading state
+        const todoColumn = document.getElementById('todo-column');
+        const progressColumn = document.getElementById('progress-column');
+        const reviewColumn = document.getElementById('review-column');
+        const completedColumn = document.getElementById('completed-column');
+        
+        if (todoColumn) todoColumn.innerHTML = '<div class="animate-pulse p-3 glass-card border border-gray-800"><div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div><div class="h-3 bg-gray-700 rounded w-full mb-2"></div><div class="h-3 bg-gray-700 rounded w-1/2"></div></div>';
+        if (progressColumn) progressColumn.innerHTML = '<div class="animate-pulse p-3 glass-card border border-gray-800"><div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div><div class="h-3 bg-gray-700 rounded w-full mb-2"></div><div class="h-3 bg-gray-700 rounded w-1/2"></div></div>';
+        if (reviewColumn) reviewColumn.innerHTML = '<div class="animate-pulse p-3 glass-card border border-gray-800"><div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div><div class="h-3 bg-gray-700 rounded w-full mb-2"></div><div class="h-3 bg-gray-700 rounded w-1/2"></div></div>';
+        if (completedColumn) completedColumn.innerHTML = '<div class="animate-pulse p-3 glass-card border border-gray-800"><div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div><div class="h-3 bg-gray-700 rounded w-full mb-2"></div><div class="h-3 bg-gray-700 rounded w-1/2"></div></div>';
+        
+        // Fetch project data first to get name and details
+        const projectResponse = await fetch(`/api/projects/${projectId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!projectResponse.ok) {
+          if (projectResponse.status === 401) {
+            showAlert('Your session has expired. Please log in again.', 'error');
+            setTimeout(() => {
+              window.location.href = 'creative-login.html';
+            }, 1500);
+            return;
+          }
+          throw new Error(`Failed to fetch project: ${projectResponse.status}`);
+        }
+        
+        const projectData = await projectResponse.json();
+        const project = projectData.project || projectData;
+        
+        // Update project name and title
+        document.getElementById('project-name').textContent = project.name || `Project #${projectId}`;
+        document.getElementById('project-title').textContent = `${project.name || `Project #${projectId}`} Tasks`;
+        
+        console.log(`Loading tasks for project ID: ${projectId}`);
+        
+        // Fetch tasks for this project from the API
+        const response = await fetch(`/api/projects/${projectId}/tasks`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Fetched tasks:', data);
+        
+        if (data.success && data.tasks) {
+          // Clear existing tasks in all columns
+          if (todoColumn) todoColumn.innerHTML = '';
+          if (progressColumn) progressColumn.innerHTML = '';
+          if (reviewColumn) reviewColumn.innerHTML = '';
+          if (completedColumn) completedColumn.innerHTML = '';
+          
+          // Categorize tasks by status
+          const todoTasks = [];
+          const progressTasks = [];
+          const reviewTasks = [];
+          const completedTasks = [];
+          
+          data.tasks.forEach(task => {
+            if (task.completed) {
+              completedTasks.push(task);
+            } else if (task.status === 'In Review') {
+              reviewTasks.push(task);
+            } else if (task.status === 'In Progress') {
+              progressTasks.push(task);
+            } else {
+              // Default to Todo for tasks without specific status
+              todoTasks.push(task);
+            }
+          });
+          
+          // Update column counter badges
+          updateColumnCounter('todo-column-count', todoTasks.length);
+          updateColumnCounter('progress-column-count', progressTasks.length);
+          updateColumnCounter('review-column-count', reviewTasks.length);
+          updateColumnCounter('completed-column-count', completedTasks.length);
+          
+          // Render tasks in each column
+          renderTasksInColumn(todoTasks, todoColumn);
+          renderTasksInColumn(progressTasks, progressColumn);
+          renderTasksInColumn(reviewTasks, reviewColumn);
+          renderTasksInColumn(completedTasks, completedColumn);
+        } else {
+          showAlert('No tasks found or failed to load tasks', 'info');
+          
+          // Clear existing tasks in all columns
+          if (todoColumn) todoColumn.innerHTML = '<div class="p-3 text-center text-text-dim">No tasks in this column</div>';
+          if (progressColumn) progressColumn.innerHTML = '<div class="p-3 text-center text-text-dim">No tasks in this column</div>';
+          if (reviewColumn) reviewColumn.innerHTML = '<div class="p-3 text-center text-text-dim">No tasks in this column</div>';
+          if (completedColumn) completedColumn.innerHTML = '<div class="p-3 text-center text-text-dim">No tasks in this column</div>';
+        }
+      } catch (error) {
+        console.error('Error loading project data:', error);
+        showAlert(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    // Update column counter badge
+    function updateColumnCounter(elementId, count) {
+      const countElement = document.getElementById(elementId);
+      if (countElement) {
+        countElement.textContent = count;
+      }
+    }
+    
+    // Render tasks in a specific column
+    function renderTasksInColumn(tasks, container) {
+      if (!container) return;
+      
+      if (tasks.length === 0) {
+        container.innerHTML = '<div class="p-3 text-center text-text-dim">No tasks in this column</div>';
+        return;
+      }
+      
+      tasks.forEach(task => {
+        const taskCard = document.createElement('div');
+        taskCard.className = 'task-card glass-card border border-gray-800 p-3 hover:border-primary/30';
+        taskCard.setAttribute('data-task-id', task.id);
+        taskCard.onclick = function() { openTaskModal(task.id); };
+        
+        // Get priority class for styling
+        const priorityClass = getPriorityClass(task.priority);
+        
+        // Format due date for display
+        let formattedDueDate = 'No date';
+        let dueDateClass = 'text-text-dim';
+        
+        if (task.dueDate) {
+          try {
+            const dueDate = new Date(task.dueDate);
+            // Check if date is valid
+            if (!isNaN(dueDate.getTime())) {
+              formattedDueDate = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              // Determine if task is overdue
+              const isOverdue = dueDate < new Date() && !task.completed;
+              dueDateClass = isOverdue ? 'text-danger' : 'text-warning';
+            }
+          } catch (e) {
+            console.warn('Invalid date format:', task.dueDate);
+          }
+        }
+        
+        // Create assignee initial for avatar
+        let assigneeInitial = '';
+        if (task.assignee) {
+          const nameParts = task.assignee.split(' ');
+          assigneeInitial = nameParts.length > 1 
+            ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+            : task.assignee[0].toUpperCase();
+        }
+        
+        // Determine the color for the assignee avatar based on name
+        let avatarColorClass = 'bg-primary/20 text-primary';
+        if (task.assignee) {
+          // Simple hash of the name to pick a color
+          const nameHash = task.assignee.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 4;
+          
+          switch(nameHash) {
+            case 0:
+              avatarColorClass = 'bg-primary/20 text-primary';
+              break;
+            case 1:
+              avatarColorClass = 'bg-secondary/20 text-secondary';
+              break;
+            case 2:
+              avatarColorClass = 'bg-success/20 text-success';
+              break;
+            case 3:
+              avatarColorClass = 'bg-accent/20 text-accent';
+              break;
+          }
+        }
+        
+        taskCard.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <h4 class="text-sm font-medium text-text-light">${task.title}</h4>
+            <div class="ml-2 px-2 py-0.5 text-xs rounded ${priorityClass}">${task.priority || 'Medium'}</div>
+          </div>
+          <p class="text-xs text-text-dim mb-3 line-clamp-2">${task.description || 'No description'}</p>
+          <div class="flex justify-between items-center">
+            ${task.assignee ? `
+            <div class="flex -space-x-2">
+              <div class="h-6 w-6 rounded-full ${avatarColorClass} flex items-center justify-center text-xs">${assigneeInitial}</div>
+            </div>
+            ` : '<div></div>'}
+            <span class="text-xs ${dueDateClass}">Due ${formattedDueDate}</span>
+          </div>
+          ${task.status === 'In Progress' ? `
+          <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div class="bg-accent h-full rounded-full" style="width: 60%"></div>
+          </div>
+          ` : ''}
+        `;
+        
+        container.appendChild(taskCard);
+      });
+    }
+    
+    // Get priority class for styling
+    function getPriorityClass(priority) {
+      if (!priority) return 'bg-gray-600/20 text-gray-400';
+      
+      const priorityLower = priority.toLowerCase();
+      
+      if (priorityLower === 'high') {
+        return 'bg-red-500/20 text-red-500';
+      } else if (priorityLower === 'medium') {
+        return 'bg-orange-500/20 text-orange-500';
+      } else {
+        return 'bg-blue-500/20 text-blue-500';
+      }
+    }
+
+    // Show alert notification
+    function showAlert(message, type = 'info') {
+      // Check if alert container exists, if not create it
+      let alertContainer = document.getElementById('alert-container');
+      if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.id = 'alert-container';
+        alertContainer.className = 'fixed bottom-4 right-4 z-50 flex flex-col gap-2';
+        document.body.appendChild(alertContainer);
+      }
+      
+      // Create alert element
+      const alert = document.createElement('div');
+      alert.className = 'p-4 rounded-lg shadow-lg flex items-center transition-all duration-500 transform translate-x-full';
+      
+      // Set color based on type
+      if (type === 'success') {
+        alert.classList.add('bg-success', 'text-white');
+      } else if (type === 'error') {
+        alert.classList.add('bg-danger', 'text-white');
+      } else {
+        alert.classList.add('bg-primary', 'text-white');
+      }
+      
+      // Set icon based on type
+      let icon;
+      if (type === 'success') {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
+      } else if (type === 'error') {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+      } else {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+      }
+      
+      // Set HTML content
+      alert.innerHTML = `
+        <div class="mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            ${icon}
+          </svg>
+        </div>
+        <div>${message}</div>
+      `;
+      
+      // Add to container
+      alertContainer.appendChild(alert);
+      
+      // Animate in
+      setTimeout(() => {
+        alert.classList.remove('translate-x-full');
+      }, 10);
+      
+      // Automatically remove after 3 seconds
+      setTimeout(() => {
+        alert.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => {
+          alert.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Open chat sidebar
+    function openChatSidebar() {
+      const chatSidebar = document.getElementById('chat-sidebar');
+      if (chatSidebar) {
+        chatSidebar.classList.remove('translate-x-full');
+        
+        // Initialize chat if needed
+        if (!window.chatInitialized) {
+          initializeChat();
+          window.chatInitialized = true;
+        }
+      }
+    }
+    
+    // Close chat sidebar
+    function closeChatSidebar() {
+      const chatSidebar = document.getElementById('chat-sidebar');
+      if (chatSidebar) {
+        chatSidebar.classList.add('translate-x-full');
+      }
+    }
+    
+    // Initialize chat
+    function initializeChat() {
+      const projectId = getQueryParam('id') || getQueryParam('project_id');
+      if (!projectId) return;
+      
+      // Load chat history
+      loadChatHistory(projectId);
+      
+      // Connect to WebSocket
+      connectToWebSocket(projectId);
+    }
+    
+    // Set event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Create background particles
+      createParticles();
+      
+      // Set up event listeners for navigation
+      document.getElementById('chat-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        openChatSidebar();
+      });
+      
+      // Check if URL has #chat hash
+      if (window.location.hash === '#chat') {
+        openChatSidebar();
+      }
+      
+      // Set up event listeners for close button
+      document.getElementById('close-chat').addEventListener('click', function(e) {
+        e.preventDefault();
+        closeChatSidebar();
+      });
+      
+      // Load project data and tasks
+      const projectId = getQueryParam('id') || getQueryParam('project_id');
+      if (projectId) {
+        loadProjectData(projectId);
+        // This line is causing the error because loadTasks doesn't exist
+        // loadTasks(projectId);
+      } else {
+        // Redirect to dashboard if no project ID
+        window.location.href = 'dashboard.html';
+      }
+    });
+    
+    function navigateToOverview() {
+      const projectId = getQueryParam('id') || getQueryParam('project_id');
+      if (projectId) {
+        window.location.href = `view-project.html?id=${projectId}`;
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    
+    function navigateToDocuments() {
+      const projectId = getQueryParam('id') || getQueryParam('project_id');
+      if (projectId) {
+        window.location.href = `documents.html?project_id=${projectId}`;
+      } else {
+        showAlert('Project ID is missing', 'error');
+        window.location.href = 'dashboard.html';
+      }
+    }
+  </script>
+  
+  <!-- Direct click handler for chat link -->
+  <script>
+    // Add a direct click handler to the chat link
+    window.addEventListener('load', function() {
+      console.log('Window load event fired');
+      const chatLink = document.getElementById('chat-link');
+      console.log('Direct chat link handler - Chat link element:', chatLink);
+      
+      if (chatLink) {
+        console.log('Adding direct click handler to chat link');
+        chatLink.onclick = function(e) {
+          console.log('Direct chat link clicked');
+          e.preventDefault();
+          
+          // Get the chat sidebar directly
+          const chatSidebar = document.getElementById('chat-sidebar');
+          console.log('Direct handler - Chat sidebar element:', chatSidebar);
+          
+          if (chatSidebar) {
+            console.log('Directly removing translate-x-full class');
+            chatSidebar.classList.remove('translate-x-full');
+            console.log('Current classes after direct removal:', chatSidebar.className);
+          } else {
+            console.error('Chat sidebar element not found in direct handler');
+          }
+          
+          return false;
+        };
+        console.log('Direct click handler added to chat link');
+      } else {
+        console.error('Chat link not found in direct handler');
+      }
+      
+      // Add direct close button handler
+      const closeButton = document.getElementById('close-chat');
+      console.log('Close chat button in load handler:', closeButton);
+      
+      if (closeButton) {
+        console.log('Adding direct click handler to close button');
+        closeButton.onclick = function(e) {
+          console.log('Direct close button clicked');
+          e.preventDefault();
+          
+          // Get the chat sidebar directly
+          const chatSidebar = document.getElementById('chat-sidebar');
+          console.log('Chat sidebar from close button handler:', chatSidebar);
+          
+          if (chatSidebar) {
+            console.log('Adding translate-x-full class from close button');
+            chatSidebar.classList.add('translate-x-full');
+            console.log('Classes after adding translate-x-full:', chatSidebar.className);
+          } else {
+            console.error('Chat sidebar not found in close button handler');
+          }
+          
+          return false;
+        };
+        console.log('Direct click handler added to close button');
+      } else {
+        console.error('Close button not found in load handler');
+      }
+    });
+  </script>
+</body>
+</html>

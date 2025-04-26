@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Documents | ProjectHub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6610f2',
+                        secondary: '#e84393',
+                        accent: '#00cec9',
+                        success: '#00b894',
+                        warning: '#fdcb6e',
+                        danger: '#d63031',
+                        dark: '#18191a',
+                        'dark-card': 'rgba(14, 14, 18, 0.8)',
+                        'text-light': '#e1e2e5',
+                        'text-dim': '#a8a9ad',
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        card: '0 20px 50px rgba(0, 0, 0, 0.5)',
+                        button: '0 10px 20px rgba(102, 16, 242, 0.3)',
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(45deg, var(--tw-gradient-from), var(--tw-gradient-to))',
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 3s ease-in-out infinite',
+                        'spin-slow': 'spin 15s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%, 100%': { filter: 'brightness(1)' },
+                            '50%': { filter: 'brightness(1.2)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Base styles that match the existing theme */
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .bg-space {
+            background-color: #18191a;
+            background-image: radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.2), transparent 25%),
+                              radial-gradient(circle at 30% 20%, rgba(232, 67, 147, 0.2), transparent 25%),
+                              radial-gradient(circle at 90% 30%, rgba(0, 206, 201, 0.2), transparent 20%);
+        }
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            animation: float 10s linear infinite;
+            opacity: 0.5;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Glass card effect */
+        .glass-card {
+            background-color: rgba(14, 14, 18, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6610f2, #e84393);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Sidebar styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Document card styles */
+        .doc-card {
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .doc-card .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .doc-card .card-body {
+            flex: 1;
+        }
+        
+        .doc-card .card-footer {
+            margin-top: auto;
+        }
+        
+        .doc-icon {
+            background: linear-gradient(135deg, rgba(102, 16, 242, 0.1), rgba(232, 67, 147, 0.1));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            display: block;
+        }
+        
+        .tooltip-text {
+            display: none;
+            position: absolute;
+            left: 0;
+            bottom: 100%;
+            margin-bottom: 5px;
+            background-color: rgba(14, 14, 18, 0.9);
+            color: #e1e2e5;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(102, 16, 242, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 50;
+            font-size: 0.875rem;
+            max-width: 250px;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        
+        /* Card filename styles */
+        .card-filename {
+            display: block;
+            font-weight: 600;
+            color: #e1e2e5;
+            font-size: 1.125rem;
+            line-height: 1.5;
+            margin-bottom: 0.25rem;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-space min-h-screen">
+    <!-- Noise overlay -->
+    <div class="noise-overlay"></div>
+    
+    <!-- Animated background particles will be added via JavaScript -->
+    <div id="particles-container" class="fixed inset-0 z-0"></div>
+
+    <!-- Mobile Menu Button (visible on small screens) -->
+    <button id="mobile-menu-button" class="fixed z-50 bottom-4 left-4 md:hidden bg-primary text-white p-3 rounded-full shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Left Sidebar (fixed) -->
+    <div class="sidebar fixed left-0 top-0 bottom-0 w-64 bg-dark-card border border-gray-800 text-text-light shadow-lg z-40 md:translate-x-0">
+        <!-- Project Name at top -->
+        <div class="p-4 border-b border-gray-800">
+            <h1 id="sidebar-project-name" class="text-xl font-bold gradient-text">Project Name</h1>
+            <p id="sidebar-project-type" class="text-text-dim text-sm">Project Type</p>
+        </div>
+        
+        <!-- Navigation Links -->
+        <nav class="mt-6">
+            <ul>
+                <li>
+                    <a href="javascript:navigateToOverview();" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:navigateToTasks();" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Tasks
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center px-4 py-3 bg-primary/20 hover:bg-primary/30 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        Documents
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:navigateToChat();" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        Chat
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                        Feedback
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 md:ml-64 min-h-screen">
+        <!-- Top Bar -->
+        <div class="glass-card sticky top-0 border border-gray-800 shadow-lg z-30">
+            <div class="px-4 py-4 md:px-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-text-light font-semibold text-xl">Project Documents</h2>
+                    <p id="topbar-project-name" class="text-sm text-text-dim">Project Name</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Back to Dashboard Button -->
+                    <a href="dashboard.html" class="rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-text-light py-2 px-4 text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Dashboard
+                    </a>
+                    
+                    <!-- Upload Button -->
+                    <button id="uploadBtn" class="rounded-lg bg-primary hover:bg-primary/90 text-white py-2 px-4 text-sm flex items-center shadow-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                        </svg>
+                        Upload Document
+                    </button>
+                    
+                    <!-- User Avatar with Dropdown -->
+                    <div class="relative">
+                        <button id="avatar-dropdown-button" class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium cursor-pointer">
+                            <!-- User initial will be inserted here via JavaScript -->
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="avatar-dropdown-menu" class="absolute right-0 mt-2 w-48 glass-card border border-gray-800 rounded-lg shadow-lg z-50 hidden">
+                            <div class="py-2 px-4 border-b border-gray-800">
+                                <p id="dropdown-user-name" class="text-sm font-medium text-text-light">User Name</p>
+                                <p id="dropdown-user-email" class="text-xs text-text-dim">user@example.com</p>
+                            </div>
+                            <div class="py-1">
+                                <a href="#" class="block px-4 py-2 text-sm text-text-light hover:bg-gray-800/50">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-text-light hover:bg-gray-800/50">Settings</a>
+                                <a href="javascript:logout()" class="block px-4 py-2 text-sm text-danger hover:bg-gray-800/50">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Content -->
+        <div class="p-4 md:p-6">
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="flex justify-center items-center py-12 hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+            
+            <!-- Documents Grid -->
+            <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Document cards will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Sidebar -->
+    <div id="chat-sidebar" class="fixed top-0 right-0 h-screen w-96 bg-dark-card border-l border-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+            <h3 class="text-lg font-medium text-text-light">Project Chat</h3>
+            <button id="close-chat" class="text-text-dim hover:text-text-light">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+            <!-- Chat messages will be loaded here -->
+            <div class="text-center my-4">
+                <p class="text-text-dim">Loading messages...</p>
+            </div>
+        </div>
+        
+        <form id="chat-form" class="flex items-center p-4 border-t border-gray-800">
+            <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-gray-800/50 text-text-light border border-gray-700 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary">
+            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </form>
+        <div id="connection-status" class="text-xs text-text-dim mt-2 text-center hidden">
+            <span class="inline-block w-2 h-2 rounded-full bg-success"></span> Connected
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-lg p-6 w-full max-w-md border border-gray-800 shadow-card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-text-light">Upload Document</h2>
+                    <button id="closeUpload" class="text-text-dim hover:text-text-light transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="uploadForm" class="space-y-4">
+                    <div id="upload-area" class="border-2 border-dashed border-gray-700 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                        <input type="file" name="file" id="file-input" class="hidden" required>
+                        <div id="upload-icon" class="text-4xl text-text-dim mb-2">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="text-sm font-medium text-text-light">Drag your file here or click to browse</p>
+                        <p class="text-xs text-text-dim mt-1">Supports PDF, Word, Excel, images, and more</p>
+                        <div id="selected-file" class="hidden mt-3 p-2 bg-gray-800/50 rounded-lg text-left">
+                            <div class="flex items-center">
+                                <div id="file-icon" class="text-primary mr-2"></div>
+                                <div class="flex-1 truncate">
+                                    <p id="file-name" class="text-sm font-medium text-text-light truncate"></p>
+                                    <p id="file-size" class="text-xs text-text-dim"></p>
+                                </div>
+                                <button type="button" id="remove-file" class="text-text-dim hover:text-danger transition-colors">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-light">Description</label>
+                        <textarea name="description" rows="3" class="mt-1 block w-full rounded-md bg-gray-800/50 border-gray-700 text-text-light focus:border-primary focus:ring-primary"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-light">Tags</label>
+                        <input type="text" name="tags" placeholder="e.g., report, presentation" class="mt-1 block w-full rounded-md bg-gray-800/50 border-gray-700 text-text-light focus:border-primary focus:ring-primary">
+                        <p class="text-xs text-text-dim mt-1">Separate multiple tags with commas</p>
+                    </div>
+                    <div id="upload-progress" class="hidden">
+                        <div class="w-full bg-gray-800 rounded-full h-2.5">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-text-dim mt-1 text-center">Uploading...</p>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancelUpload" class="px-4 py-2 text-sm font-medium text-text-light bg-gray-800/70 hover:bg-gray-700/70 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-upload" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg shadow-button transition-colors">
+                            Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-lg p-6 w-full max-w-4xl border border-gray-800 shadow-card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="previewTitle" class="text-xl font-bold text-text-light"></h2>
+                    <button id="closePreview" class="text-text-dim hover:text-text-light transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="previewContent" class="w-full h-[70vh]">
+                    <!-- Preview content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentProjectId = null;
+        let currentUserData = null;
+        
+        // Try to get token from both localStorage and sessionStorage
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        // Background particles animation
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const count = window.innerWidth / 20; // Adjust density as needed
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size
+                const size = Math.random() * 4 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                
+                // Random animation duration
+                const duration = Math.random() * 30 + 10;
+                particle.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Get project ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProjectId = urlParams.get('project_id') || urlParams.get('id');  // Check for both parameter names
+            
+            // Initialize avatar dropdown
+            initializeDropdown();
+            
+            if (!currentProjectId || !token) {
+                console.error('Missing project ID or token, redirecting to dashboard');
+                window.location.href = 'dashboard.html';
+            } else {
+                console.log('Document page initialized with project ID:', currentProjectId);
+                
+                // Show loading indicator
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                loadingIndicator.classList.remove('hidden');
+                
+                // Load user data, then load project details, then load documents
+                loadUserData()
+                    .then(() => loadProjectDetails())
+                    .then(() => loadDocuments())
+                    .catch(error => {
+                        console.error('Error during initialization:', error);
+                        loadingIndicator.classList.add('hidden');
+                    });
+                
+                // Set up mobile menu toggling
+                document.getElementById('mobile-menu-button').addEventListener('click', function() {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+        });
+        
+        // Initialize avatar dropdown
+        function initializeDropdown() {
+            const dropdownButton = document.getElementById('avatar-dropdown-button');
+            const dropdownMenu = document.getElementById('avatar-dropdown-menu');
+            
+            dropdownButton.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Load user data
+        async function loadUserData() {
+            try {
+                // Always ensure the token has 'Bearer ' prefix
+                const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+                
+                const response = await fetch('/api/user', {
+                    headers: {
+                        'Authorization': authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`Failed to load user data: ${response.status} ${response.statusText}`);
+                
+                const userData = await response.json();
+                currentUserData = userData;
+                
+                // Set user initial in avatar
+                const avatarButton = document.getElementById('avatar-dropdown-button');
+                avatarButton.innerText = userData.name.charAt(0).toUpperCase();
+                
+                // Set user info in dropdown
+                document.getElementById('dropdown-user-name').innerText = userData.name;
+                document.getElementById('dropdown-user-email').innerText = userData.email;
+                
+                return userData;
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                return null;
+            }
+        }
+        
+        // Load project details
+        async function loadProjectDetails() {
+            try {
+                // Always ensure the token has 'Bearer ' prefix
+                const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+                
+                const response = await fetch(`/api/projects/${currentProjectId}`, {
+                    headers: {
+                        'Authorization': authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`Failed to load project details: ${response.status} ${response.statusText}`);
+                
+                const projectData = await response.json();
+                
+                // Update project name in sidebar and topbar
+                document.getElementById('sidebar-project-name').innerText = projectData.name;
+                document.getElementById('sidebar-project-type').innerText = projectData.type || 'Project';
+                document.getElementById('topbar-project-name').innerText = projectData.name;
+                
+                // Update page title
+                document.title = `${projectData.name} - Documents | ProjectHub`;
+                
+                return projectData;
+            } catch (error) {
+                console.error('Error loading project details:', error);
+                return null;
+            }
+        }
+
+        // Load documents
+        async function loadDocuments() {
+            try {
+                // Always ensure the token has 'Bearer ' prefix
+                const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+                
+                const response = await fetch(`/api/projects/${currentProjectId}/documents`, {
+                    headers: {
+                        'Authorization': authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                
+                if (!response.ok) throw new Error(`Failed to load documents: ${response.status} ${response.statusText}`);
+                
+                const documents = await response.json();
+                
+                const grid = document.getElementById('documentsGrid');
+                grid.innerHTML = '';
+
+                if (documents.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto text-gray-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <h3 class="mt-6 text-xl font-medium text-text-light">No documents yet</h3>
+                            <p class="mt-2 text-text-dim">Upload your first document to get started.</p>
+                            <button id="noDocsUploadBtn" class="mt-6 bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg shadow-button transition duration-200">
+                                <i class="fas fa-upload mr-2"></i> Upload Document
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('noDocsUploadBtn').addEventListener('click', () => {
+                        uploadModal.classList.remove('hidden');
+                    });
+                } else {
+                    documents.forEach(doc => {
+                        const card = createDocumentCard(doc);
+                        grid.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                
+                const grid = document.getElementById('documentsGrid');
+                grid.innerHTML = `
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="mt-6 text-xl font-medium text-text-light">Error loading documents</h3>
+                        <p class="mt-2 text-danger">${error.message}</p>
+                        <button onclick="loadDocuments()" class="mt-6 bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg shadow-button transition duration-200">
+                            <i class="fas fa-sync-alt mr-2"></i> Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Create document card
+        function createDocumentCard(doc) {
+            const card = document.createElement('div');
+            card.className = 'glass-card doc-card border border-gray-800 rounded-lg shadow-card p-5 hover:border-gray-700';
+            
+            const icon = getFileIcon(doc.file_type);
+            const date = new Date(doc.uploaded_at).toLocaleDateString();
+            
+            card.innerHTML = `
+                <div class="card-content h-full">
+                    <div class="card-body">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="doc-icon text-3xl text-primary p-4 min-w-[60px] min-h-[60px]">
+                                ${icon}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="tooltip">
+                                    <h3 class="card-filename" title="${doc.filename}">${doc.filename}</h3>
+                                    <span class="tooltip-text">${doc.filename}</span>
+                                </div>
+                                <p class="text-sm text-text-dim flex items-center">
+                                    <i class="fas fa-user-circle mr-2"></i> ${doc.uploaded_by}
+                                </p>
+                                <p class="text-sm text-text-dim flex items-center mt-1">
+                                    <i class="fas fa-calendar-alt mr-2"></i> ${date}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        ${doc.description ? `<p class="mt-2 text-sm text-text-dim mb-4 line-clamp-2" title="${doc.description}">${doc.description}</p>` : ''}
+                        
+                        ${doc.tags ? `<div class="flex flex-wrap gap-2 mb-3">
+                            ${doc.tags.split(',').map(tag => `
+                                <span class="px-2 py-1 text-xs bg-gray-800/70 rounded-full text-text-dim">
+                                    ${tag.trim()}
+                                </span>
+                            `).join('')}
+                        </div>` : ''}
+                    </div>
+                    
+                    <div class="card-footer mt-3 pt-3 border-t border-gray-800">
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="previewDocument(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="text-primary hover:text-secondary transition-colors duration-200 flex items-center font-medium">
+                                <i class="fas fa-eye mr-2"></i> Preview
+                            </button>
+                            <a href="/api/documents/${doc.id}" download class="text-primary hover:text-secondary transition-colors duration-200 flex items-center font-medium">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Get file icon based on type
+        function getFileIcon(fileType) {
+            const icons = {
+                'pdf': '<i class="fas fa-file-pdf"></i>',
+                'doc': '<i class="fas fa-file-word"></i>',
+                'docx': '<i class="fas fa-file-word"></i>',
+                'xls': '<i class="fas fa-file-excel"></i>',
+                'xlsx': '<i class="fas fa-file-excel"></i>',
+                'jpg': '<i class="fas fa-file-image"></i>',
+                'jpeg': '<i class="fas fa-file-image"></i>',
+                'png': '<i class="fas fa-file-image"></i>',
+                'gif': '<i class="fas fa-file-image"></i>',
+                'txt': '<i class="fas fa-file-alt"></i>',
+                'zip': '<i class="fas fa-file-archive"></i>',
+                'ppt': '<i class="fas fa-file-powerpoint"></i>',
+                'pptx': '<i class="fas fa-file-powerpoint"></i>'
+            };
+            return icons[fileType] || '<i class="fas fa-file"></i>';
+        }
+
+        // Preview document
+        async function previewDocument(docId, fileName) {
+            try {
+                // Show loading in preview
+                const previewContent = document.getElementById('previewContent');
+                previewContent.innerHTML = `
+                    <div class="flex justify-center items-center h-full">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                `;
+                
+                const previewTitle = document.getElementById('previewTitle');
+                previewTitle.textContent = fileName || 'Document Preview';
+                
+                // Show modal
+                previewModal.classList.remove('hidden');
+                
+                // Always ensure the token has 'Bearer ' prefix
+                const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+                
+                const response = await fetch(`/api/documents/${docId}`, {
+                    headers: {
+                        'Authorization': authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load document');
+                
+                const contentType = response.headers.get('content-type');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                // Set preview content based on file type
+                if (contentType && contentType.includes('image')) {
+                    previewContent.innerHTML = `
+                        <div class="flex items-center justify-center h-full bg-gray-900/50 rounded">
+                            <img src="${url}" class="max-w-full max-h-full object-contain" alt="Preview">
+                        </div>
+                    `;
+                } else if (contentType && contentType.includes('pdf')) {
+                    previewContent.innerHTML = `
+                        <iframe src="${url}" class="w-full h-full border-0 rounded" frameborder="0"></iframe>
+                    `;
+                } else {
+                    previewContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <div class="text-5xl text-text-dim mb-4">${getFileIcon(fileName.split('.').pop().toLowerCase())}</div>
+                            <p class="text-center text-text-dim">Preview not available for this file type</p>
+                            <a href="/api/documents/${docId}" download class="mt-6 bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg shadow-button transition duration-200">
+                                <i class="fas fa-download mr-2"></i> Download File
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error previewing document:', error);
+                const previewContent = document.getElementById('previewContent');
+                previewContent.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-danger mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-center text-danger">Error loading document: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Modal controls
+        const uploadModal = document.getElementById('uploadModal');
+        const previewModal = document.getElementById('previewModal');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const cancelUpload = document.getElementById('cancelUpload');
+        const closePreview = document.getElementById('closePreview');
+        const closeUpload = document.getElementById('closeUpload');
+        const uploadForm = document.getElementById('uploadForm');
+
+        uploadBtn.addEventListener('click', () => uploadModal.classList.remove('hidden'));
+        cancelUpload.addEventListener('click', () => uploadModal.classList.add('hidden'));
+        closeUpload.addEventListener('click', () => uploadModal.classList.add('hidden'));
+        closePreview.addEventListener('click', () => previewModal.classList.add('hidden'));
+
+        // Escape key to close modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                uploadModal.classList.add('hidden');
+                previewModal.classList.add('hidden');
+            }
+        });
+
+        // Handle file upload modal interactions
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const selectedFile = document.getElementById('selected-file');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const fileIcon = document.getElementById('file-icon');
+        const removeFile = document.getElementById('remove-file');
+        const uploadProgress = document.getElementById('upload-progress');
+        const progressBar = uploadProgress.querySelector('.bg-primary');
+        
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-primary');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('border-primary');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileInfo();
+            }
+        });
+        
+        fileInput.addEventListener('change', updateFileInfo);
+        
+        function updateFileInfo() {
+            if (fileInput.files.length) {
+                const file = fileInput.files[0];
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                fileIcon.innerHTML = getFileIcon(fileExt);
+                selectedFile.classList.remove('hidden');
+                document.getElementById('upload-icon').classList.add('hidden');
+            } else {
+                selectedFile.classList.add('hidden');
+                document.getElementById('upload-icon').classList.remove('hidden');
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        removeFile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.value = '';
+            selectedFile.classList.add('hidden');
+            document.getElementById('upload-icon').classList.remove('hidden');
+        });
+
+        // Handle file upload
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!fileInput.files.length) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            const formData = new FormData(uploadForm);
+            
+            try {
+                // Show upload progress
+                uploadProgress.classList.remove('hidden');
+                document.getElementById('submit-upload').disabled = true;
+                
+                // Simulate progress (in real implementation, use actual upload progress)
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    if (progress > 90) clearInterval(interval);
+                    progressBar.style.width = `${progress}%`;
+                }, 100);
+                
+                // Always ensure the token has 'Bearer ' prefix
+                const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+                
+                const response = await fetch(`/api/projects/${currentProjectId}/documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authToken
+                    },
+                    body: formData
+                });
+                
+                // Complete progress
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                
+                if (!response.ok) throw new Error('Failed to upload document');
+                
+                setTimeout(() => {
+                    uploadModal.classList.add('hidden');
+                    uploadForm.reset();
+                    uploadProgress.classList.add('hidden');
+                    document.getElementById('submit-upload').disabled = false;
+                    selectedFile.classList.add('hidden');
+                    document.getElementById('upload-icon').classList.remove('hidden');
+                    progressBar.style.width = '0%';
+                    loadDocuments();
+                }, 500);
+            } catch (error) {
+                console.error('Error uploading document:', error);
+                uploadProgress.classList.add('hidden');
+                document.getElementById('submit-upload').disabled = false;
+                alert(`Error uploading document: ${error.message}`);
+            }
+        });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            window.location.href = 'creative-login.html';
+        }
+
+        // Navigation functions
+        function navigateToOverview() {
+            window.location.href = `view-project.html?id=${currentProjectId}`;
+        }
+
+        function navigateToTasks() {
+            window.location.href = `tasks.html?project_id=${currentProjectId}`;
+        }
+
+        function navigateToChat() {
+            console.log('Chat link clicked in documents.html');
+            const chatSidebar = document.getElementById('chat-sidebar');
+            if (chatSidebar) {
+                chatSidebar.classList.remove('translate-x-full');
+                // Initialize chat if needed
+                if (!chatInitialized) {
+                    initializeChat(currentProjectId);
+                    chatInitialized = true;
+                }
+            }
+        }
+        
+        // Chat WebSocket functionality
+        let chatSocket = null;
+        let chatInitialized = false;
+        let currentUserId = null;
+        let currentUserName = null;
+        
+        // Initialize chat functionality
+        function initializeChat(projectId) {
+            console.log('Initializing chat for project:', projectId);
+            
+            // Get user information from localStorage/sessionStorage
+            const userDataStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+            const userData = userDataStr ? JSON.parse(userDataStr) : null;
+            
+            if (userData) {
+                currentUserId = userData.id;
+                currentUserName = userData.name;
+            } else {
+                // Fallback to getting user data from the currentUserData variable
+                if (currentUserData) {
+                    currentUserId = currentUserData.id;
+                    currentUserName = currentUserData.name;
+                }
+            }
+            
+            if (!currentUserId || !currentUserName) {
+                console.error('User data not found in storage');
+                return;
+            }
+            
+            // Load chat history from the server
+            loadChatHistory(projectId);
+            
+            // Connect to WebSocket server
+            connectWebSocket();
+            
+            // Set up chat form submission handler
+            setupChatForm();
+            
+            // Set up close chat button
+            setupChatCloseButton();
+        }
+        
+        // Load chat history from the server
+        function loadChatHistory(projectId) {
+            const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+            if (!authToken) {
+                console.error('Authentication required');
+                return;
+            }
+            
+            // Clear chat messages container
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = `
+                <div class="text-center">
+                    <div class="inline-block p-2 rounded-lg bg-gray-800/50">
+                        <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+            `;
+            
+            // Fetch chat history from API
+            fetch(`/api/chat/messages/${projectId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load chat history');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    displayChatMessages(data.messages);
+                } else {
+                    throw new Error(data.message || 'Failed to load chat history');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading chat history:', error);
+                chatMessages.innerHTML = `
+                    <div class="text-center my-4">
+                        <p class="text-text-dim">Failed to load chat history. Please try again later.</p>
+                    </div>
+                `;
+            });
+        }
+        
+        // Display chat messages
+        function displayChatMessages(messages) {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            
+            if (!messages || messages.length === 0) {
+                chatMessages.innerHTML = `
+                    <div class="text-center my-4">
+                        <p class="text-text-dim">No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            messages.forEach(message => {
+                const isCurrentUser = message.user_id === currentUserId;
+                const messageEl = document.createElement('div');
+                messageEl.className = isCurrentUser
+                    ? 'flex flex-col items-end'
+                    : 'flex flex-col items-start';
+                
+                messageEl.innerHTML = `
+                    <div class="max-w-[80%] ${isCurrentUser ? 'bg-primary/20 text-text-light' : 'bg-gray-800/50 text-text-light'} rounded-lg px-4 py-2">
+                        ${message.content}
+                    </div>
+                    <div class="text-xs text-text-dim mt-1">
+                        ${message.username} • ${new Date(message.created_at).toLocaleTimeString()}
+                    </div>
+                `;
+                
+                chatMessages.appendChild(messageEl);
+            });
+            
+            // Scroll to the bottom of the chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            // Close existing connection if any
+            if (chatSocket && chatSocket.readyState !== WebSocket.CLOSED) {
+                chatSocket.close();
+            }
+            
+            // Create new WebSocket connection
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsHost = window.location.hostname;
+            const wsPort = 5001; // Using the WebSocket port
+            
+            try {
+                chatSocket = new WebSocket(`${wsProtocol}//${wsHost}:${wsPort}`);
+                
+                // Connection opened
+                chatSocket.addEventListener('open', function(event) {
+                    console.log('WebSocket connection established');
+                    
+                    // Show connection status
+                    const connectionStatus = document.getElementById('connection-status');
+                    if (connectionStatus) {
+                        connectionStatus.classList.remove('hidden');
+                    }
+                    
+                    // Join the project chat room
+                    if (currentProjectId) {
+                        const joinMessage = {
+                            type: 'join',
+                            project_id: currentProjectId,
+                            user_id: currentUserId,
+                            username: currentUserName
+                        };
+                        chatSocket.send(JSON.stringify(joinMessage));
+                    }
+                });
+                
+                // Listen for messages
+                chatSocket.addEventListener('message', function(event) {
+                    console.log('Message from server:', event.data);
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'message') {
+                            // Add the message to the chat
+                            const chatMessages = document.getElementById('chat-messages');
+                            const isCurrentUser = data.user_id === currentUserId;
+                            const messageEl = document.createElement('div');
+                            
+                            messageEl.className = isCurrentUser
+                                ? 'flex flex-col items-end'
+                                : 'flex flex-col items-start';
+                            
+                            messageEl.innerHTML = `
+                                <div class="max-w-[80%] ${isCurrentUser ? 'bg-primary/20 text-text-light' : 'bg-gray-800/50 text-text-light'} rounded-lg px-4 py-2">
+                                    ${data.content}
+                                </div>
+                                <div class="text-xs text-text-dim mt-1">
+                                    ${data.username} • ${new Date().toLocaleTimeString()}
+                                </div>
+                            `;
+                            
+                            chatMessages.appendChild(messageEl);
+                            
+                            // Scroll to the bottom of the chat
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
+                    }
+                });
+                
+                // Connection closed
+                chatSocket.addEventListener('close', function(event) {
+                    console.log('WebSocket connection closed');
+                    
+                    // Hide connection status
+                    const connectionStatus = document.getElementById('connection-status');
+                    if (connectionStatus) {
+                        connectionStatus.classList.add('hidden');
+                    }
+                    
+                    // Try to reconnect after a delay
+                    setTimeout(connectWebSocket, 5000);
+                });
+                
+                // Connection error
+                chatSocket.addEventListener('error', function(event) {
+                    console.error('WebSocket error:', event);
+                });
+            } catch (error) {
+                console.error('Error creating WebSocket connection:', error);
+            }
+        }
+        
+        // Set up chat form submission handler
+        function setupChatForm() {
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            
+            if (chatForm && chatInput) {
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const message = chatInput.value.trim();
+                    if (!message) return;
+                    
+                    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                        // Send message via WebSocket
+                        const messageData = {
+                            type: 'message',
+                            project_id: currentProjectId,
+                            user_id: currentUserId,
+                            username: currentUserName,
+                            content: message
+                        };
+                        
+                        chatSocket.send(JSON.stringify(messageData));
+                        
+                        // Also send to server via HTTP for persistence
+                        sendMessageToServer(message);
+                        
+                        // Clear input
+                        chatInput.value = '';
+                    } else {
+                        console.error('WebSocket not connected');
+                    }
+                });
+            }
+        }
+        
+        // Send message to server via HTTP for persistence
+        function sendMessageToServer(message) {
+            const authToken = token && !token.startsWith('Bearer ') ? `Bearer ${token}` : token;
+            if (!authToken) {
+                console.error('Authentication required');
+                return;
+            }
+            
+            fetch(`/api/chat/messages/${currentProjectId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: message
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send message to server');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to send message to server');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message to server:', error);
+            });
+        }
+        
+        // Set up close chat button
+        function setupChatCloseButton() {
+            const closeButton = document.getElementById('close-chat');
+            if (closeButton) {
+                closeButton.addEventListener('click', function() {
+                    const chatSidebar = document.getElementById('chat-sidebar');
+                    if (chatSidebar) {
+                        chatSidebar.classList.add('translate-x-full');
+                    }
+                });
+            }
+        }
+        
+        // Listen for Escape key to close chat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const chatSidebar = document.getElementById('chat-sidebar');
+                if (chatSidebar && !chatSidebar.classList.contains('translate-x-full')) {
+                    chatSidebar.classList.add('translate-x-full');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,3110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project View | ProjectHub</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6610f2',
+            secondary: '#e84393',
+            accent: '#00cec9',
+            success: '#00b894',
+            warning: '#fdcb6e',
+            danger: '#d63031',
+            dark: '#18191a',
+            'dark-card': 'rgba(14, 14, 18, 0.8)',
+            'text-light': '#e1e2e5',
+            'text-dim': '#a8a9ad',
+          },
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+          },
+          boxShadow: {
+            card: '0 20px 50px rgba(0, 0, 0, 0.5)',
+            button: '0 10px 20px rgba(102, 16, 242, 0.3)',
+          },
+          backgroundImage: {
+            'gradient-primary': 'linear-gradient(45deg, var(--tw-gradient-from), var(--tw-gradient-to))',
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite',
+            'spin-slow': 'spin 15s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%, 100%': { filter: 'brightness(1)' },
+              '50%': { filter: 'brightness(1.2)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Base styles that match the existing theme */
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .bg-space {
+      background-color: #18191a;
+      background-image: radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.2), transparent 25%),
+                        radial-gradient(circle at 30% 20%, rgba(232, 67, 147, 0.2), transparent 25%),
+                        radial-gradient(circle at 90% 30%, rgba(0, 206, 201, 0.2), transparent 20%);
+    }
+    
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+      animation: float 10s linear infinite;
+      opacity: 0.5;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+      }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Glass card effect */
+    .glass-card {
+      background-color: rgba(14, 14, 18, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+    }
+    
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #6610f2, #e84393);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    /* Light mode styles */
+    .light-mode {
+      --bg-color: #f8fafc;
+      --text-light: #1e293b;
+      --text-dim: #64748b;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --border-color: #e2e8f0;
+    }
+    
+    .light-mode .bg-space {
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at 70% 80%, rgba(102, 16, 242, 0.08), transparent 25%),
+        radial-gradient(circle at 30% 20%, rgba(232, 67, 147, 0.08), transparent 25%),
+        radial-gradient(circle at 90% 30%, rgba(0, 206, 201, 0.08), transparent 25%);
+    }
+    
+    .light-mode .glass-card {
+      background-color: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .light-mode .particle {
+      background-color: rgba(102, 16, 242, 0.15);
+    }
+    
+    .light-mode .text-text-light {
+      color: var(--text-light);
+    }
+    
+    .light-mode .text-text-dim {
+      color: var(--text-dim);
+    }
+    
+    /* Sidebar styles */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    }
+    
+    /* Sliding chat panel */
+    .chat-panel {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .chat-panel.active {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+<body class="bg-space min-h-screen">
+  <!-- Noise overlay -->
+  <div class="noise-overlay"></div>
+  
+  <!-- Animated background particles will be added via JavaScript -->
+  <div id="particles-container" class="fixed inset-0 z-0"></div>
+
+  <!-- Mobile Menu Button (visible on small screens) -->
+  <button id="mobile-menu-button" class="fixed z-50 bottom-4 left-4 md:hidden bg-primary text-white p-3 rounded-full shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <!-- Left Sidebar (fixed) -->
+  <div class="sidebar fixed left-0 top-0 bottom-0 w-64 bg-dark-card border border-gray-800 text-text-light shadow-lg z-40 md:translate-x-0">
+    <!-- Project Name at top -->
+    <div class="p-4 border-b border-gray-800">
+      <h1 class="text-xl font-bold gradient-text">Project Name</h1>
+      <p class="text-text-dim text-sm">Project Type</p>
+    </div>
+    
+    <!-- Navigation Links -->
+    <nav class="mt-6">
+      <ul>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 bg-primary/20 hover:bg-primary/30 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Overview
+          </a>
+        </li>
+        <li>
+          <a href="javascript:navigateToTasks();" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Tasks
+          </a>
+        </li>
+        <li>
+          <a href="javascript:navigateToDocuments();" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Documents
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Timeline
+          </a>
+        </li>
+        <li>
+          <a href="javascript:navigateToChat();" id="chat-link" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Chat
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-gray-800/50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            Feedback
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 md:ml-64 min-h-screen">
+    <!-- Top Bar -->
+    <div class="glass-card sticky top-0 border border-gray-800 shadow-lg z-30">
+      <div class="px-4 py-4 md:px-6 flex justify-between items-center">
+        <div>
+          <h2 class="welcome-message text-text-light font-semibold">Welcome</h2>
+          <p id="topbar-project-name" class="text-sm text-text-dim">Project Name</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <!-- Back to Dashboard Button -->
+          <a href="dashboard.html" class="rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-text-light py-2 px-4 text-sm flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Dashboard
+          </a>
+          
+          <button class="relative p-2 rounded-full hover:bg-gray-800/50 text-text-dim">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span class="absolute top-0 right-0 bg-primary rounded-full w-2 h-2"></span>
+          </button>
+          
+          <!-- User Avatar with Dropdown -->
+          <div class="relative">
+            <button id="avatar-dropdown-button" class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium cursor-pointer">
+              <!-- User initial will be inserted here via JavaScript -->
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div id="avatar-dropdown-menu" class="absolute right-0 mt-2 w-48 glass-card border border-gray-800 rounded-lg shadow-lg z-50 hidden">
+              <div class="py-2 px-4 border-b border-gray-800">
+                <p id="dropdown-user-name" class="text-sm font-medium text-text-light">User Name</p>
+                <p id="dropdown-user-email" class="text-xs text-text-dim">user@example.com</p>
+              </div>
+              <div class="py-1">
+                <a href="#" class="block px-4 py-2 text-sm text-text-light hover:bg-gray-800/50">Profile</a>
+                <a href="#" class="block px-4 py-2 text-sm text-text-light hover:bg-gray-800/50">Settings</a>
+                <a href="javascript:logout()" class="block px-4 py-2 text-sm text-danger hover:bg-gray-800/50">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Tabs -->
+    <div class="p-4 md:p-6">
+      <div class="mb-6 border-b border-gray-800">
+        <div class="flex">
+          <button class="px-4 py-2 border-b-2 border-primary text-text-light font-medium">
+            Overview
+          </button>
+          <button class="px-4 py-2 border-b-2 border-transparent text-text-dim hover:text-text-light">
+            Tasks
+          </button>
+          <button class="px-4 py-2 border-b-2 border-transparent text-text-dim hover:text-text-light">
+            Documents
+          </button>
+          <button class="px-4 py-2 border-b-2 border-transparent text-text-dim hover:text-text-light">
+            Timeline
+          </button>
+        </div>
+      </div>
+
+      <!-- Overview Tab Content -->
+      <div id="overview-content" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Project Description -->
+        <div class="lg:col-span-2">
+          <div class="glass-card border border-gray-800 shadow-card p-6 mb-6">
+            <h3 class="text-lg font-medium text-text-light mb-3">Project Description</h3>
+            <p class="text-text-dim mb-4">
+              <!-- Project description will be inserted here via JavaScript -->
+            </p>
+            <div class="mt-4">
+              <h4 class="text-md font-medium text-text-light mb-2">Key Objectives:</h4>
+              <ul class="list-disc pl-5 space-y-1">
+                <!-- Objectives will be inserted here via JavaScript -->
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Tasks Section -->
+          <div class="glass-card border border-gray-800 shadow-card p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-text-light">Recent Tasks</h3>
+              <div class="flex gap-2">
+                <button id="fix-tasks-button" class="rounded-lg bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 text-sm flex items-center shadow-lg hidden">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Sample Tasks
+                </button>
+                <button id="new-task-button" class="rounded-lg bg-primary hover:bg-primary/90 text-white py-2 px-4 text-sm flex items-center shadow-button" onclick="document.getElementById('new-task-modal').classList.remove('hidden')">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add New Task
+                </button>
+              </div>
+            </div>
+            
+            <!-- Task List (will be populated dynamically) -->
+            <div class="space-y-3">
+              <!-- Task items will be inserted here via JavaScript -->
+            </div>
+            
+            <div class="mt-4 text-center">
+              <a href="#" class="text-sm text-primary hover:text-secondary">View all tasks</a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Column: Project Info -->
+        <div class="lg:col-span-1">
+          <!-- Progress Card -->
+          <div class="glass-card border border-gray-800 shadow-card p-6 mb-6">
+            <h3 class="text-lg font-medium text-text-light mb-3">Project Progress</h3>
+            <div class="w-full bg-gray-800 rounded-full h-2.5 mb-4 overflow-hidden">
+              <div id="progress-bar" class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-text-dim">0% complete</span>
+              <span class="text-text-dim">0 days remaining</span>
+            </div>
+          </div>
+          
+          <!-- Due Date Card -->
+          <div class="glass-card border border-gray-800 shadow-card p-6 mb-6">
+            <h3 class="text-lg font-medium text-text-light mb-3">Due Date</h3>
+            <div class="flex items-center">
+              <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-xl font-semibold text-text-light">Not set</div>
+                <div class="text-sm text-text-dim">0 days remaining</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Team Members Card -->
+          <div class="glass-card border border-gray-800 shadow-card p-6">
+            <h3 class="text-lg font-medium text-text-light mb-4">Team Members</h3>
+            <div class="flex mb-4">
+              <div class="flex -space-x-2">
+                <!-- Team avatars will be inserted here via JavaScript -->
+              </div>
+            </div>
+            <ul class="space-y-3">
+              <!-- Team member list will be inserted here via JavaScript -->
+            </ul>
+            <div class="mt-4 text-center">
+              <a href="#" class="text-sm text-primary hover:text-secondary">See all members</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Panel (slide-over drawer) -->
+  <div id="chat-panel" class="chat-panel fixed right-0 top-0 bottom-0 w-80 glass-card border-l border-gray-800 shadow-lg z-50 flex flex-col">
+    <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+      <h3 class="font-semibold text-text-light">Team Chat</h3>
+      <button id="close-chat" class="p-1 hover:bg-gray-800/50 rounded text-text-dim">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <!-- Day Separator -->
+      <div class="text-center my-2">
+        <span class="text-xs text-text-dim bg-gray-800/50 px-2 py-1 rounded-full">Today</span>
+      </div>
+      
+      <!-- Message: Received -->
+      <div class="flex items-start">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-white font-medium mr-2">S</div>
+        <div>
+          <div class="bg-gray-800/30 p-3 rounded-lg rounded-tl-none max-w-[200px] border border-gray-800/50">
+            <p class="text-sm text-text-light">Has everyone completed their tasks for this week?</p>
+          </div>
+          <span class="text-xs text-text-dim mt-1">10:30 AM</span>
+        </div>
+      </div>
+      
+      <!-- Message: Received -->
+      <div class="flex items-start">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-success flex items-center justify-center text-white font-medium mr-2">J</div>
+        <div>
+          <div class="bg-gray-800/30 p-3 rounded-lg rounded-tl-none max-w-[200px] border border-gray-800/50">
+            <p class="text-sm text-text-light">I'm still working on the Instagram post designs. Should be done by tomorrow!</p>
+          </div>
+          <span class="text-xs text-text-dim mt-1">10:32 AM</span>
+        </div>
+      </div>
+      
+      <!-- Message: Sent -->
+      <div class="flex items-start justify-end">
+        <div>
+          <div class="bg-primary/30 p-3 rounded-lg rounded-tr-none max-w-[200px] border border-primary/20">
+            <p class="text-sm text-text-light">I've finished the project timeline. Will share the document shortly.</p>
+          </div>
+          <span class="text-xs text-text-dim mt-1 flex justify-end">10:35 AM</span>
+        </div>
+      </div>
+      
+      <!-- Message: Received -->
+      <div class="flex items-start">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-success to-warning flex items-center justify-center text-white font-medium mr-2">M</div>
+        <div>
+          <div class="bg-gray-800/30 p-3 rounded-lg rounded-tl-none max-w-[200px] border border-gray-800/50">
+            <p class="text-sm text-text-light">Great work! We should schedule a meeting to discuss the next steps.</p>
+          </div>
+          <span class="text-xs text-text-dim mt-1">10:40 AM</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Message Input -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="flex">
+        <input type="text" placeholder="Type your message..." class="flex-1 bg-gray-800/50 border-gray-700 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-text-light">
+        <button class="bg-primary hover:bg-primary/90 text-white px-4 rounded-r-lg shadow-button">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="new-task-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+      <div class="glass-card border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-lg relative">
+        <button class="close-modal absolute top-4 right-4 text-gray-400 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <h3 class="text-xl font-semibold text-text-light mb-4">Create New Task</h3>
+        
+        <form id="new-task-form" class="space-y-4">
+          <div>
+            <label for="task-title" class="block text-sm font-medium text-text-light mb-1">Task Title</label>
+            <input type="text" id="task-title" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+          </div>
+          
+          <div>
+            <label for="task-description" class="block text-sm font-medium text-text-light mb-1">Description</label>
+            <textarea id="task-description" rows="3" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="task-priority" class="block text-sm font-medium text-text-light mb-1">Priority</label>
+              <select id="task-priority" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="task-due-date" class="block text-sm font-medium text-text-light mb-1">Due Date</label>
+              <input type="date" id="task-due-date" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+            </div>
+          </div>
+          
+          <div>
+            <label for="task-assignee" class="block text-sm font-medium text-text-light mb-1">Assign To</label>
+            <select id="task-assignee" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50">
+              <option value="">Select team member</option>
+              <!-- This will be populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="flex justify-end gap-3 pt-4">
+            <button type="button" class="close-modal px-4 py-2 text-sm font-medium text-text-light bg-gray-800 hover:bg-gray-700 rounded-lg transition">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition">
+              Create Task
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add particles to background
+    function createParticles() {
+      const container = document.getElementById('particles-container');
+      const particleCount = 50;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 2-6px
+        const size = Math.random() * 4 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        
+        // Random animation duration between 10-20s
+        const duration = Math.random() * 10 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay so they don't all move at once
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        
+        container.appendChild(particle);
+      }
+    }
+    
+    // Get URL parameter by name
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Load project data when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded');
+      
+      // Load user data first
+      loadUserData();
+      
+      // Then validate token and fetch project data
+      validateTokenAndLoadData();
+      
+      // Initialize task modal events
+      initializeTaskEvents();
+      
+      // Setup dropdown for user avatar
+      setupAvatarDropdown();
+      
+      // Add logout event handlers
+      document.querySelectorAll('.logout-button').forEach(button => {
+        button.addEventListener('click', logout);
+      });
+    });
+
+    // Initialize all task-related event listeners
+    function initializeTaskEvents() {
+      // If events are already initialized, don't add them again
+      if (window.eventsInitialized) {
+        console.log("Task events already initialized, skipping");
+        return;
+      }
+      
+      console.log("Initializing task events");
+      
+      // New Task button event listener
+      const newTaskButton = document.getElementById('new-task-button');
+      const newTaskModal = document.getElementById('new-task-modal');
+      const newTaskForm = document.getElementById('new-task-form');
+      
+      console.log("New task button:", newTaskButton);
+      console.log("New task modal:", newTaskModal);
+      
+      // Function to open the modal and reset form
+      function openTaskModal() {
+        console.log("Opening task modal");
+        
+        // Reset form fields
+        if (newTaskForm) {
+          newTaskForm.reset();
+          
+          // Set default due date to a week from now
+          const dueDateField = document.getElementById('task-due-date');
+          if (dueDateField) {
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            dueDateField.value = nextWeek.toISOString().split('T')[0];
+          }
+        }
+        
+        // Show modal
+        if (newTaskModal) {
+          newTaskModal.classList.remove('hidden');
+          console.log("Modal hidden class removed");
+        }
+      }
+      
+      // Function to close the modal
+      function closeTaskModal() {
+        console.log("Closing task modal");
+        if (newTaskModal) {
+          newTaskModal.classList.add('hidden');
+        }
+      }
+      
+      // Remove any existing event listeners (to prevent duplicates)
+      if (newTaskButton) {
+        const newButton = newTaskButton.cloneNode(true);
+        if (newTaskButton.parentNode) {
+          newTaskButton.parentNode.replaceChild(newButton, newTaskButton);
+        }
+        
+        // Add event listener to new task button
+        console.log("Adding click event listener to new task button");
+        newButton.addEventListener('click', openTaskModal);
+        
+        // Keep the existing onclick attribute as a fallback
+      }
+      
+      // Close modal buttons
+      const closeButtons = document.querySelectorAll('.close-modal');
+      console.log("Close buttons found:", closeButtons.length);
+      
+      closeButtons.forEach(button => {
+        const newButton = button.cloneNode(true);
+        if (button.parentNode) {
+          button.parentNode.replaceChild(newButton, button);
+        }
+        newButton.addEventListener('click', closeTaskModal);
+      });
+      
+      // Close modal with escape key
+      // We don't need to worry about duplicating this as it checks if the modal is hidden
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && newTaskModal && !newTaskModal.classList.contains('hidden')) {
+          closeTaskModal();
+        }
+      });
+      
+      // New Task form submission
+      if (newTaskForm) {
+        const newForm = newTaskForm.cloneNode(true);
+        if (newTaskForm.parentNode) {
+          newTaskForm.parentNode.replaceChild(newForm, newTaskForm);
+        }
+        
+        newForm.addEventListener('submit', function(e) {
+          console.log("Form submitted");
+          e.preventDefault();
+          createNewTask();
+        });
+      } else {
+        console.warn("Could not find new task form");
+      }
+      
+      // Mark events as initialized
+      window.eventsInitialized = true;
+    }
+
+    // Create new task
+    async function createNewTask() {
+      try {
+        const projectId = getProjectIdFromURL();
+        if (!projectId) {
+          showAlert('Project ID is missing', 'error');
+          return;
+        }
+        
+        // Get form values
+        const taskTitle = document.getElementById('task-title').value.trim();
+        const taskDescription = document.getElementById('task-description').value.trim();
+        const taskPriority = document.getElementById('task-priority').value;
+        const taskDueDate = document.getElementById('task-due-date').value;
+        const taskAssignee = document.getElementById('task-assignee').value;
+        
+        // Validate inputs
+        if (!taskTitle) {
+          showAlert('Please enter a task title', 'error');
+          return;
+        }
+        
+        if (!taskDueDate) {
+          showAlert('Please select a due date', 'error');
+          return;
+        }
+        
+        console.log('Creating task with data:', {
+          title: taskTitle,
+          description: taskDescription,
+          priority: taskPriority,
+          dueDate: taskDueDate,
+          assignee: taskAssignee
+        });
+        
+        // Show loading state
+        const submitBtn = document.querySelector('#new-task-form button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Creating...
+        `;
+        
+        // Prepare task data
+        const taskData = {
+          title: taskTitle,
+          description: taskDescription,
+          priority: taskPriority,
+          dueDate: taskDueDate,
+          assignee: taskAssignee,
+          completed: false
+        };
+        
+        // Send request to create task
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const response = await fetch(`/api/projects/${projectId}/tasks`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(taskData)
+        });
+        
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || `Failed to create task: ${response.status}`);
+        }
+        
+        if (data.success) {
+          // Close modal
+          const modal = document.getElementById('new-task-modal');
+          if (modal) {
+            modal.classList.add('hidden');
+          }
+          
+          // Reset form
+          document.getElementById('new-task-form').reset();
+          
+          // Show success message
+          showAlert('Task created successfully', 'success');
+          
+          // Reload project data to show the new task
+          loadProjectData();
+        } else {
+          throw new Error(data.message || 'Failed to create task');
+        }
+      } catch (error) {
+        console.error('Error creating task:', error);
+        showAlert(`Error creating task: ${error.message}`, 'error');
+      }
+    }
+
+    // Load user data from local storage or session storage
+    function loadUserData() {
+      try {
+        const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+        console.log('Loaded user data:', userData);
+        
+        if (userData && userData.name) {
+          // Update welcome message
+          const welcomeElements = document.querySelectorAll('.welcome-message');
+          welcomeElements.forEach(element => {
+            // Get project name from the top bar project name element
+            const projectName = document.getElementById('topbar-project-name').textContent || 'Project Name';
+            element.textContent = `Welcome, ${userData.name.split(' ')[0]}`;
+          });
+          
+          // Update profile image/avatar
+          updateUserAvatar(userData);
+          return userData;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        return null;
+      }
+    }
+    
+    // Load team members into container elements
+    function loadTeamMembersToElement(teamMembers, avatarsContainer, membersContainer) {
+      if (!avatarsContainer && !membersContainer) {
+        console.warn('Team members containers not found');
+        return;
+      }
+      
+      // Find the team members list and team avatars containers if not provided
+      if (!membersContainer) {
+        // Look for the container in the user-defined structure
+        membersContainer = document.querySelector('.space-y-3');
+      }
+      
+      if (!avatarsContainer) {
+        // Look for the avatars container in the user-defined structure
+        avatarsContainer = document.querySelector('.flex.-space-x-2');
+      }
+      
+      if (!membersContainer || !avatarsContainer) {
+        console.warn('Team members containers not found even after searching');
+        return;
+      }
+      
+      console.log('Team members containers found, loading data');
+      
+      // Clear existing content
+      if (membersContainer) membersContainer.innerHTML = '';
+      if (avatarsContainer) avatarsContainer.innerHTML = '';
+      
+      if (!teamMembers || teamMembers.length === 0) {
+        if (membersContainer) {
+          membersContainer.innerHTML = '<li class="text-text-dim">No team members assigned to this project yet</li>';
+        }
+        return;
+      }
+      
+      // Add team members to the list
+      teamMembers.forEach(member => {
+        const memberName = typeof member === 'string' ? member : (member.name || 'Unknown');
+        const memberRole = member.role || 'Team Member';
+        const memberAvatar = member.avatar || '';
+        
+        // Create initials from name
+        const nameParts = memberName.split(' ');
+        const initials = nameParts.length > 1 
+          ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+          : memberName[0].toUpperCase();
+        
+        // Add to avatars
+        if (avatarsContainer) {
+          const avatar = document.createElement('div');
+          avatar.className = 'h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium border-2 border-gray-900';
+          
+          if (memberAvatar) {
+            avatar.innerHTML = `<img src="${memberAvatar}" alt="${memberName}" class="h-full w-full rounded-full">`;
+          } else {
+            avatar.textContent = initials;
+          }
+          
+          avatarsContainer.appendChild(avatar);
+        }
+        
+        // Add to members list
+        if (membersContainer) {
+          const memberItem = document.createElement('li');
+          memberItem.className = 'flex items-center p-2 rounded-lg hover:bg-gray-800/30';
+          
+          memberItem.innerHTML = `
+            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-medium mr-3">
+              ${initials}
+            </div>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-text-light">${memberName}</div>
+              <div class="text-xs text-text-dim">${memberRole}</div>
+            </div>
+          `;
+          
+          membersContainer.appendChild(memberItem);
+        }
+      });
+    }
+    
+    // Load tasks into a container element
+    function loadTasksToElement(tasks, container) {
+      if (!container) {
+        // Try to find the container if not provided
+        container = document.querySelector('.space-y-3');
+        
+        if (!container) {
+          console.warn('Tasks container not found');
+          return;
+        }
+      }
+      
+      console.log('Tasks container found, loading data');
+      container.innerHTML = '';
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = '<div class="text-text-dim p-4">No tasks for this project yet</div>';
+        return;
+      }
+
+      console.log('Loading tasks:', tasks);
+      
+      // Display only the first 3 tasks
+      const displayTasks = tasks.slice(0, 3);
+      
+      displayTasks.forEach(task => {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'glass-card border border-gray-800 p-3 mb-3';
+        
+        const priorityClass = getPriorityClass(task.priority);
+        const completedClass = task.completed ? 'line-through opacity-50' : '';
+        
+        taskItem.innerHTML = `
+          <div class="flex items-start">
+            <div class="flex-shrink-0 mt-1">
+              <input type="checkbox" class="task-checkbox w-4 h-4 rounded border-gray-700 bg-gray-800 text-primary focus:ring-primary/50" 
+                ${task.completed ? 'checked' : ''}>
+            </div>
+            <div class="ml-3 flex-grow">
+              <h4 class="text-sm font-medium text-text-light ${completedClass}">${task.title}</h4>
+              <p class="text-xs text-text-dim mt-1 ${completedClass}">${task.description || 'No description'}</p>
+              <div class="flex items-center mt-2 space-x-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+                  ${task.priority || 'Medium'}
+                </span>
+                ${task.dueDate ? `
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/20 text-secondary">
+                  Due: ${new Date(task.dueDate).toLocaleDateString()}
+                </span>` : ''}
+                ${task.assignee ? `
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary">
+                  ${task.assignee}
+                </span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(taskItem);
+      });
+      
+      // Add "View all tasks" link if there are more than 3 tasks
+      if (tasks.length > 3) {
+        const viewAllLink = document.createElement('div');
+        viewAllLink.className = 'text-center mt-3';
+        viewAllLink.innerHTML = `<a href="#" class="text-primary hover:text-secondary">View all ${tasks.length} tasks</a>`;
+        container.appendChild(viewAllLink);
+      }
+    }
+    
+    // Load objectives into a container element
+    function loadObjectivesToElement(objectives, container) {
+      if (!container) {
+        // Try to find the container if not provided
+        container = document.querySelector('.list-disc.pl-5.space-y-1');
+        
+        if (!container) {
+          console.warn('Objectives container not found');
+          return;
+        }
+      }
+      
+      console.log('Objectives container found, loading data');
+      container.innerHTML = '';
+      
+      if (!objectives || objectives.length === 0) {
+        container.innerHTML = '<li class="text-text-dim">No objectives defined for this project</li>';
+        return;
+      }
+      
+      objectives.forEach(objective => {
+        const li = document.createElement('li');
+        li.className = 'text-text-dim mb-1';
+        li.textContent = objective;
+        container.appendChild(li);
+      });
+    }
+    
+    // Update project progress display
+    function updateProjectProgress(progress) {
+      console.log(`Updating progress bar to ${progress}%`);
+      // Find progress bar by ID first
+      let progressBar = document.getElementById('progress-bar');
+      
+      // If not found, try to find it by class
+      if (!progressBar) {
+        progressBar = document.querySelector('.bg-gradient-to-r.from-primary.to-secondary');
+      }
+      
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+        console.log('Progress bar updated successfully');
+      } else {
+        console.warn('Progress bar element not found');
+      }
+      
+      // Update progress text
+      const progressTextElements = document.querySelectorAll('.text-text-dim');
+      let progressTextFound = false;
+      
+      progressTextElements.forEach(el => {
+        if (el.textContent.includes('complete')) {
+          el.textContent = `${progress}% complete`;
+          progressTextFound = true;
+        }
+      });
+      
+      if (!progressTextFound) {
+        console.warn('Progress text element not found');
+      }
+    }
+
+    // Function to add sample tasks to a project
+    async function addSampleTasks(projectId) {
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        // Show loading state
+        const fixTasksButton = document.getElementById('fix-tasks-button');
+        if (fixTasksButton) {
+          const originalText = fixTasksButton.innerHTML;
+          fixTasksButton.disabled = true;
+          fixTasksButton.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding...
+          `;
+        }
+        
+        // Call the API to add sample tasks
+        const response = await fetch('/api/debug/add-sample-tasks', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ project_id: projectId })
+        });
+        
+        // Reset button state
+        if (fixTasksButton) {
+          fixTasksButton.disabled = false;
+          fixTasksButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Sample Tasks
+          `;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`Failed to add sample tasks: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert(data.message, 'success');
+          // Reload project data to show the new tasks
+          loadProjectData();
+        } else {
+          throw new Error(data.message || 'Failed to add sample tasks');
+        }
+      } catch (error) {
+        console.error('Error adding sample tasks:', error);
+        showAlert(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    // Navigate to tasks page with current project ID
+    function navigateToTasks() {
+      const projectId = getProjectIdFromURL();
+      if (projectId) {
+        window.location.href = `tasks.html?project_id=${projectId}`;
+      } else {
+        showAlert('Project ID is missing', 'error');
+      }
+    }
+    
+    // Navigate to documents page with current project ID
+    function navigateToDocuments() {
+      const projectId = getProjectIdFromURL();
+      if (projectId) {
+        window.location.href = `documents.html?project_id=${projectId}`;
+      } else {
+        showAlert('Project ID is missing', 'error');
+      }
+    }
+
+    // Validate token and load project data
+    async function validateTokenAndLoadData() {
+      // Create particles for background effect if available
+      if (typeof createParticles === 'function') {
+        createParticles();
+      }
+      
+      // Get project ID from URL
+      const projectId = getQueryParam('id');
+      if (!projectId) {
+        console.error('Project ID is missing from the URL');
+        showAlert('Project ID is missing from the URL', 'error');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 2000);
+        return;
+      }
+      
+      console.log('Validating token for project:', projectId);
+      
+      try {
+        // Validate token first
+        const isTokenValid = await validateToken();
+        
+        if (isTokenValid) {
+          console.log('Token validated successfully, loading project data');
+          // Load project data
+          loadProjectData();
+          
+          // Initialize event listeners for modals and tasks if not already done
+          if (typeof initializeChatPanel === 'function') {
+            initializeChatPanel();
+          }
+        } else {
+          // Don't redirect here - validateToken function already handles redirects
+          console.error('Failed to validate token');
+        }
+      } catch (error) {
+        console.error('Error during validation:', error);
+        showAlert('Error validating your session. Please try logging in again.', 'error');
+        setTimeout(() => {
+          window.location.href = 'creative-login.html';
+        }, 2000);
+      }
+    }
+
+    // Setup avatar dropdown toggle
+    function setupAvatarDropdown() {
+      const avatarButtons = document.querySelectorAll('#avatar-dropdown-button');
+      const dropdownMenus = document.querySelectorAll('#avatar-dropdown-menu');
+      
+      avatarButtons.forEach((button, index) => {
+        // Remove existing event listeners by cloning and replacing
+        const newButton = button.cloneNode(true);
+        if (button.parentNode) {
+          button.parentNode.replaceChild(newButton, button);
+        }
+        
+        // Get corresponding dropdown menu
+        const menu = dropdownMenus[index];
+        if (!menu) return;
+        
+        // Add click event to toggle dropdown
+        newButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          menu.classList.toggle('hidden');
+        });
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        dropdownMenus.forEach(menu => {
+          if (!menu.contains(e.target) && !e.target.matches('#avatar-dropdown-button')) {
+            menu.classList.add('hidden');
+          }
+        });
+      });
+    }
+
+    // Logout function
+    function logout() {
+      // Clear tokens and user data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      
+      // Redirect to login page
+      window.location.href = 'creative-login.html';
+    }
+
+    // Update user avatar in the top right corner and dropdown
+    function updateUserAvatar(user) {
+      if (!user || !user.name) return;
+      
+      // Get first letter of first and last name
+      const nameParts = user.name.split(' ');
+      const initials = nameParts.length > 1 
+        ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+        : nameParts[0][0].toUpperCase();
+      
+      // Find all avatar buttons
+      const avatarButtons = document.querySelectorAll('#avatar-dropdown-button');
+      
+      avatarButtons.forEach(button => {
+        // Clear existing content first
+        button.innerHTML = '';
+        
+        // Add user initials
+        button.textContent = initials;
+      });
+      
+      // Update dropdown user info
+      const nameElements = document.querySelectorAll('#dropdown-user-name');
+      const emailElements = document.querySelectorAll('#dropdown-user-email');
+      
+      nameElements.forEach(el => {
+        el.textContent = user.name;
+      });
+      
+      emailElements.forEach(el => {
+        el.textContent = user.email || '';
+      });
+      
+      // Add click event to avatar buttons to toggle dropdown
+      setupAvatarDropdown();
+      
+      console.log(`Avatar updated with initials: ${initials}`);
+    }
+
+    // Get project ID from URL
+    function getProjectIdFromURL() {
+      console.log('Current URL:', window.location.href);
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      console.log('Found ID in URL:', id);
+      return id;
+    }
+
+    // Show alert notification
+    function showAlert(message, type = 'info') {
+      // Check if alert container exists, if not create it
+      let alertContainer = document.getElementById('alert-container');
+      if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.id = 'alert-container';
+        alertContainer.className = 'fixed bottom-4 right-4 z-50 flex flex-col gap-2';
+        document.body.appendChild(alertContainer);
+      }
+      
+      // Create alert element
+      const alert = document.createElement('div');
+      alert.className = 'p-4 rounded-lg shadow-lg flex items-center transition-all duration-500 transform translate-x-full';
+      
+      // Set color based on type
+      if (type === 'success') {
+        alert.classList.add('bg-success', 'text-white');
+      } else if (type === 'error') {
+        alert.classList.add('bg-danger', 'text-white');
+      } else {
+        alert.classList.add('bg-primary', 'text-white');
+      }
+      
+      // Set icon based on type
+      let icon;
+      if (type === 'success') {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
+      } else if (type === 'error') {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+      } else {
+        icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+      }
+      
+      // Set HTML content
+      alert.innerHTML = `
+        <div class="mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            ${icon}
+          </svg>
+        </div>
+        <div>${message}</div>
+      `;
+      
+      // Add to container
+      alertContainer.appendChild(alert);
+      
+      // Animate in
+      setTimeout(() => {
+        alert.classList.remove('translate-x-full');
+      }, 10);
+      
+      // Automatically remove after 3 seconds
+      setTimeout(() => {
+        alert.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => {
+          alert.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Validate token before loading project data
+    async function validateToken() {
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        if (!token) {
+          console.log('No token found, redirecting to login');
+          window.location.href = 'creative-login.html';
+          return false;
+        }
+        
+        console.log('Validating token...');
+        
+        // Use relative URL instead of absolute URL with localhost
+        const response = await fetch('/api/check-token', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Token': `Bearer ${token}` // Add Token header as seen in the server logs
+          },
+          mode: 'cors' // Add CORS mode explicitly
+        });
+        
+        console.log('Token validation response status:', response.status);
+        
+        if (response.status === 401) {
+          console.log('Token invalid or expired');
+          // Clear invalid tokens
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
+          
+          showAlert('Your session has expired. Please log in again.', 'error');
+          setTimeout(() => {
+            window.location.href = 'creative-login.html';
+          }, 1500);
+          return false;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          console.log('Token validation failed:', data);
+          showAlert('Authentication failed. Please log in again.', 'error');
+          setTimeout(() => {
+            window.location.href = 'creative-login.html';
+          }, 1500);
+          return false;
+        }
+        
+        console.log('Token validation successful');
+        return true;
+      } catch (error) {
+        console.error('Error validating token:', error);
+        showAlert('Error checking authentication. Please try again.', 'error');
+        return false;
+      }
+    }
+
+    // Get priority class for styling
+    function getPriorityClass(priority) {
+      if (!priority) return 'bg-gray-600';
+      
+      const priorityLower = priority.toLowerCase();
+      
+      if (priorityLower === 'high') {
+        return 'bg-red-500/20 text-red-500';
+      } else if (priorityLower === 'medium') {
+        return 'bg-orange-500/20 text-orange-500';
+      } else {
+        return 'bg-blue-500/20 text-blue-500';
+      }
+    }
+
+    // Load project data from the backend
+    function loadProjectData() {
+      const projectId = getQueryParam('id');
+      if (!projectId) {
+        console.error('Project ID is missing from the URL');
+        showAlert('Project ID is missing from the URL', 'error');
+        return;
+      }
+      
+      console.log('Loading project data for project ID:', projectId);
+      
+      // Get token from localStorage or sessionStorage
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        showAlert('You need to log in to view this project', 'error');
+        setTimeout(() => {
+          window.location.href = 'creative-login.html';
+        }, 1500);
+        return;
+      }
+      
+      // Display loading state in the overview content
+      const mainContent = document.getElementById('overview-content');
+      if (mainContent) {
+        // Show subtle loading indicator that doesn't disrupt layout
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loading-overlay';
+        loadingOverlay.className = 'fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm';
+        loadingOverlay.innerHTML = `
+          <div class="glass-card border border-gray-800 p-6 rounded-xl flex items-center">
+            <svg class="animate-spin h-6 w-6 text-primary mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-text-light">Loading project data...</span>
+          </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+      }
+      
+      // Use relative URL instead of absolute URL with localhost
+      fetch(`/api/projects/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.status === 401) {
+          // Unauthorized - redirect to login
+          console.error('Unauthorized access');
+          showAlert('You are not authorized to view this project', 'error');
+          setTimeout(() => {
+            window.location.href = 'creative-login.html';
+          }, 1500);
+          throw new Error('Unauthorized');
+        }
+        if (response.status === 404) {
+          // Project not found
+          console.error('Project not found');
+          showAlert('Project not found', 'error');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+          throw new Error('Project not found');
+        }
+        if (!response.ok) {
+          // Other server error
+          console.error('Server error:', response.status);
+          showAlert('Error loading project data', 'error');
+          throw new Error('Server error');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Project data received:', data);
+        
+        // Remove loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.remove();
+        }
+        
+        // Check if data has success property and project property
+        let projectData;
+        if (data.success && data.project) {
+          projectData = data.project;
+        } else if (data.id) {
+          projectData = data; // Direct project object
+        } else {
+          console.error('Invalid project data format:', data);
+          showAlert('Invalid project data received', 'error');
+          return;
+        }
+        
+        console.log('Parsed project data:', projectData);
+        
+        // Update UI with project data
+        updateProjectUI(projectData);
+      })
+      .catch(error => {
+        console.error('Error fetching project data:', error);
+        
+        // Remove loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.remove();
+        }
+        
+        // Display a more user-friendly error in the UI
+        if (mainContent) {
+          mainContent.innerHTML = `
+            <div class="lg:col-span-3 glass-card border border-gray-800 shadow-card p-6 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-danger mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-danger mb-2">Error Loading Project</h2>
+              <p class="text-text-dim mb-4">We couldn't load the project data. Please try again later.</p>
+              <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+          `;
+        }
+      });
+    }
+
+    // Update UI with project data
+    function updateProjectUI(project) {
+      if (!project) {
+        console.warn('No project data provided to updateProjectUI');
+        return;
+      }
+      
+      console.log('Updating UI with project data:', project);
+      
+      // Update project name in sidebar
+      const projectNameElements = document.querySelectorAll('.gradient-text');
+      projectNameElements.forEach(el => {
+        el.textContent = project.name || 'Unnamed Project';
+      });
+      
+      // Update project type in sidebar
+      const projectTypeElements = document.querySelectorAll('.text-text-dim.text-sm');
+      projectTypeElements.forEach(el => {
+        if (el.closest('.p-4.border-b.border-gray-800')) {
+          el.textContent = project.type || 'Project';
+        }
+      });
+      
+      // Update project name in header
+      const projectHeaderElement = document.querySelector('#projectHeader');
+      if (projectHeaderElement) {
+        projectHeaderElement.textContent = project.name || 'Unnamed Project';
+      }
+      
+      // Update project name in top bar
+      const topbarProjectName = document.querySelector('#topbar-project-name');
+      if (topbarProjectName) {
+        topbarProjectName.textContent = project.name || 'Unnamed Project';
+      }
+      
+      // Update welcome message with username and project name
+      updateWelcomeWithProject(project.name);
+      
+      // Update project description
+      const projectDescElements = document.querySelectorAll('.text-text-dim.mb-4');
+      projectDescElements.forEach(el => {
+        if (el.closest('.glass-card') && el.tagName === 'P') {
+          el.textContent = project.description || 'No description provided for this project.';
+        }
+      });
+      
+      // Update progress
+      updateProjectProgress(project.progress || 0);
+      
+      // Handle project due date display
+      updateProjectDueDate(project);
+      
+      // Show/hide new task button based on if user is project owner
+      const newTaskButtons = document.querySelectorAll('#new-task-button, #addNewTaskButton');
+      newTaskButtons.forEach(button => {
+        if (button) {
+          const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+          const projectOwnerId = project.user_id || project.ownerId;
+          button.style.display = (userData.id === projectOwnerId) ? 'flex' : 'none';
+        }
+      });
+      
+      // Find team members containers
+      const teamMembersContainer = document.querySelector('.space-y-3');
+      const teamAvatarsContainer = document.querySelector('.flex.-space-x-2');
+      
+      // Load team members into UI
+      const teamMembers = project.teamMembers || project.team_members || [];
+      loadTeamMembersToElement(teamMembers, teamAvatarsContainer, teamMembersContainer);
+      
+      // Find tasks container
+      const tasksContainer = document.querySelector('.space-y-3');
+      if (tasksContainer) {
+        loadTasksToElement(project.tasks || [], tasksContainer);
+      }
+      
+      // Find objectives container
+      const objectivesContainer = document.querySelector('.list-disc.pl-5.space-y-1');
+      if (objectivesContainer) {
+        loadObjectivesToElement(project.objectives || [], objectivesContainer);
+      }
+      
+      // Update assignee dropdown for task creation
+      const assigneeDropdown = document.getElementById('task-assignee');
+      if (assigneeDropdown && teamMembers) {
+        // Clear existing options
+        assigneeDropdown.innerHTML = '<option value="">Select Assignee</option>';
+        
+        // Get current user
+        const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+        const currentUserName = userData.name;
+        
+        // Create a set to track added members to avoid duplicates
+        const addedMembers = new Set();
+        
+        // Add current user as first option if they are not already in the team members list
+        if (currentUserName) {
+          const option = document.createElement('option');
+          option.value = currentUserName;
+          option.textContent = `${currentUserName} (You)`;
+          option.selected = true; // Set current user as default assignee
+          assigneeDropdown.appendChild(option);
+          addedMembers.add(currentUserName.toLowerCase());
+        }
+        
+        // Add team members to dropdown
+        teamMembers.forEach(member => {
+          let memberName;
+          if (typeof member === 'string') {
+            memberName = member;
+          } else if (member && typeof member === 'object') {
+            memberName = member.name || '';
+          } else {
+            return; // Skip invalid member format
+          }
+          
+          // Skip empty names or already added members (case insensitive check)
+          if (!memberName || addedMembers.has(memberName.toLowerCase())) {
+            return;
+          }
+          
+          // Add this member to the set to prevent duplicates
+          addedMembers.add(memberName.toLowerCase());
+          
+          const option = document.createElement('option');
+          option.value = memberName;
+          option.textContent = memberName;
+          assigneeDropdown.appendChild(option);
+        });
+      }
+    }
+
+    // Function to handle and update project due date display
+    function updateProjectDueDate(project) {
+      // Find all due date elements
+      const dueDateElements = document.querySelectorAll('.text-xl.font-semibold.text-text-light');
+      const daysRemainingElements = document.querySelectorAll('.text-text-dim');
+      
+      // Log possible date fields for debugging
+      console.log('Project date fields:', {
+        dueDate: project.dueDate,
+        endDate: project.endDate,
+        due_date: project.due_date,
+        end_date: project.end_date,
+        deadline: project.deadline
+      });
+      
+      // Try to extract a valid date from project data
+      let dateValue = project.endDate || project.dueDate || project.due_date || project.end_date || project.deadline;
+      let dueDate = null;
+      
+      if (dateValue) {
+        console.log('Found date value:', dateValue);
+        
+        // If it's already a Date object
+        if (dateValue instanceof Date) {
+          dueDate = dateValue;
+        } 
+        // If it's a string, try to parse it
+        else if (typeof dateValue === 'string') {
+          // First try standard date parsing
+          dueDate = new Date(dateValue);
+          
+          // If that fails, try alternative formats
+          if (isNaN(dueDate.getTime())) {
+            console.log('Standard date parsing failed, trying alternative formats');
+            
+            // Try DD/MM/YYYY or DD-MM-YYYY format
+            const dateParts = dateValue.split(/[-\/\.]/);
+            if (dateParts.length === 3) {
+              // Try different date formats
+              const potentialFormats = [
+                new Date(dateParts[2], dateParts[1] - 1, dateParts[0]), // DD/MM/YYYY
+                new Date(dateParts[2], dateParts[0] - 1, dateParts[1]), // MM/DD/YYYY
+                new Date(dateParts[0], dateParts[1] - 1, dateParts[2])  // YYYY/MM/DD
+              ];
+              
+              // Use the first valid date
+              for (const format of potentialFormats) {
+                if (!isNaN(format.getTime())) {
+                  dueDate = format;
+                  console.log('Successfully parsed date:', dueDate);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Update the UI with the date info
+      if (dueDate && !isNaN(dueDate.getTime())) {
+        // Format the date for display
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        const formattedDate = dueDate.toLocaleDateString(undefined, options);
+        
+        // Calculate days remaining
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to start of day
+        
+        // Normalize the due date to start of day for accurate day calculation
+        const dueDateNormalized = new Date(dueDate);
+        dueDateNormalized.setHours(0, 0, 0, 0);
+        
+        const diffTime = dueDateNormalized - today;
+        const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        console.log('Due date calculation:', {
+          today: today.toISOString(),
+          dueDate: dueDateNormalized.toISOString(),
+          diffTimeMs: diffTime,
+          daysRemaining: daysRemaining
+        });
+        
+        // Update due date display - Find the element more directly
+        // Get all due date cards and find the one with the specific structure
+        const dueDateCard = document.querySelector('.glass-card .text-xl.font-semibold.text-text-light');
+        if (dueDateCard) {
+          dueDateCard.textContent = formattedDate;
+          console.log('Due date element found and updated to:', formattedDate);
+        } else {
+          console.error('Could not find due date element');
+        }
+        
+        // Update days remaining text - more targeted approach
+        // Find the specific element in the Due Date card that shows days remaining
+        let daysRemainingText = null;
+        
+        // Find all section headers
+        const sectionHeaders = document.querySelectorAll('.glass-card h3.text-lg.font-medium');
+        for (const header of sectionHeaders) {
+          // Find the Due Date header
+          if (header.textContent.includes('Due Date')) {
+            // Get the parent card then find the days remaining text within it
+            const dueDateCard = header.closest('.glass-card');
+            if (dueDateCard) {
+              daysRemainingText = dueDateCard.querySelector('.text-sm.text-text-dim');
+              break;
+            }
+          }
+        }
+        
+        // If we couldn't find it with the above method, use a more general selector
+        if (!daysRemainingText) {
+          daysRemainingText = document.querySelector('.glass-card .text-sm.text-text-dim');
+        }
+        
+        if (daysRemainingText) {
+          daysRemainingText.textContent = `${daysRemaining > 0 ? daysRemaining : 0} days remaining`;
+          console.log('Days remaining updated to:', daysRemaining);
+        } else {
+          console.error('Could not find days remaining element');
+        }
+        
+        console.log('Due date updated:', formattedDate, ', Days remaining:', daysRemaining);
+      } else {
+        console.warn('No valid due date found in project data');
+        
+        // Set fallback text for no due date - more directly
+        const dueDateCard = document.querySelector('.glass-card .text-xl.font-semibold.text-text-light');
+        if (dueDateCard) {
+          dueDateCard.textContent = 'Not set';
+        }
+        
+        // Set days remaining to 0 - more directly
+        const daysRemainingText = document.querySelector('.glass-card .text-sm.text-text-dim');
+        if (daysRemainingText) {
+          daysRemainingText.textContent = '0 days remaining';
+        }
+      }
+    }
+
+    // Add a function to update welcome message with project name
+    function updateWelcomeWithProject(projectName) {
+      if (!projectName) return;
+      
+      const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+      const userName = userData.name ? userData.name.split(' ')[0] : '';
+      
+      // Update welcome message with username and project name
+      const welcomeElements = document.querySelectorAll('.welcome-message');
+      welcomeElements.forEach(element => {
+        element.textContent = `Welcome${userName ? ', ' + userName : ''}`;
+      });
+    }
+
+    // Look for setupEventListeners function and add chat functionality
+    function setupEventListeners() {
+      // Event listeners for navigation and modals
+      setupNavigationEvents();
+      setupModalEvents();
+      
+      // Chat link
+      const chatLink = document.getElementById('chat-link');
+      console.log('View-project - Chat link element:', chatLink);
+      if (chatLink) {
+        chatLink.addEventListener('click', function(e) {
+          console.log('View-project - Chat link clicked');
+          e.preventDefault();
+          openChatSidebar();
+        });
+      } else {
+        console.error('View-project - Chat link not found in the DOM');
+      }
+      
+      // Close chat button
+      const closeChat = document.getElementById('close-chat');
+      console.log('View-project - Close chat button:', closeChat);
+      if (closeChat) {
+        closeChat.addEventListener('click', function() {
+          console.log('View-project - Close chat button clicked');
+          closeChatSidebar();
+        });
+      } else {
+        console.error('View-project - Close chat button not found in the DOM');
+      }
+    }
+    
+    // Helper function for navigation events
+    function setupNavigationEvents() {
+      // Mobile menu button
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const sidebar = document.querySelector('.sidebar');
+      
+      if (mobileMenuButton && sidebar) {
+        mobileMenuButton.addEventListener('click', function() {
+          sidebar.classList.toggle('active');
+        });
+      }
+      
+      // Dashboard link
+      const dashboardLink = document.getElementById('dashboard-link');
+      if (dashboardLink) {
+        dashboardLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = 'dashboard.html';
+        });
+      }
+    }
+    
+    // Helper function for modal events
+    function setupModalEvents() {
+      // New task button
+      const newTaskButton = document.getElementById('new-task-button');
+      if (newTaskButton) {
+        newTaskButton.addEventListener('click', openTaskModal);
+      }
+      
+      // Close modal buttons
+      const closeButtons = document.querySelectorAll('.close-modal');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const modal = this.closest('.modal-container');
+          if (modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      });
+    }
+    
+    // Add these functions before the closing script tag
+    // Open chat sidebar
+    function openChatSidebar() {
+      console.log('View-project - openChatSidebar called');
+      const chatSidebar = document.getElementById('chat-sidebar');
+      console.log('View-project - Chat sidebar element:', chatSidebar);
+      if (chatSidebar) {
+        console.log('View-project - Removing translate-x-full class');
+        chatSidebar.classList.remove('translate-x-full');
+        console.log('View-project - Current classes after removal:', chatSidebar.className);
+      } else {
+        console.error('View-project - Chat sidebar element not found');
+      }
+    }
+    
+    // Close chat sidebar
+    function closeChatSidebar() {
+      console.log('View-project - closeChatSidebar called');
+      const chatSidebar = document.getElementById('chat-sidebar');
+      console.log('View-project - Chat sidebar element:', chatSidebar);
+      if (chatSidebar) {
+        console.log('View-project - Adding translate-x-full class');
+        chatSidebar.classList.add('translate-x-full');
+        console.log('View-project - Current classes after addition:', chatSidebar.className);
+      } else {
+        console.error('View-project - Chat sidebar element not found');
+      }
+    }
+    
+    // Update any existing keydown event listener to also close the chat sidebar
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        // Close any open modals
+        const newTaskModal = document.getElementById('new-task-modal');
+        if (newTaskModal && !newTaskModal.classList.contains('hidden')) {
+          newTaskModal.classList.add('hidden');
+        }
+        
+        // Close chat sidebar
+        closeChatSidebar();
+      }
+    });
+
+    // Open chat sidebar
+    function navigateToChat() {
+      const chatSidebar = document.getElementById('chat-sidebar');
+      if (chatSidebar) {
+        chatSidebar.classList.remove('translate-x-full');
+        
+        // Initialize chat if needed
+        if (!window.chatInitialized) {
+          // If initializeChat function exists, call it
+          if (typeof initializeChat === 'function') {
+            initializeChat(getProjectIdFromURL());
+            window.chatInitialized = true;
+          }
+        }
+      }
+    }
+
+    // Initialize chat functionality
+    function initializeChat(projectId) {
+      // Store the current project ID
+      currentProjectId = projectId;
+      
+      // Get user information from localStorage/sessionStorage
+      const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+      currentUserId = userData.id;
+      currentUserName = userData.name;
+      
+      if (!currentUserId || !currentUserName) {
+        console.error('User data not found in storage');
+        return;
+      }
+      
+      // Initialize end-to-end encryption for this project
+      ChatE2EE.init(projectId);
+      console.log('End-to-end encryption initialized for project', projectId);
+      
+      // Load chat history from the server
+      loadChatHistory(projectId);
+      
+      // Connect to WebSocket server
+      connectWebSocket();
+      
+      // Set up chat form submission handler
+      setupChatForm();
+      
+      // Add encryption status indicator to the chat header
+      const chatHeader = document.querySelector('#chat-sidebar .flex.justify-between');
+      if (chatHeader) {
+        const encryptionIndicator = document.createElement('div');
+        encryptionIndicator.className = 'text-xs px-2 py-1 bg-green-800/30 text-green-400 rounded-full flex items-center';
+        encryptionIndicator.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>E2E Encrypted';
+        chatHeader.appendChild(encryptionIndicator);
+      }
+    }
+    
+    // Load chat history from the server
+    function loadChatHistory(projectId) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showAlert('Authentication required', 'error');
+        return;
+      }
+      
+      // Clear chat messages container
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = `
+        <div class="text-center">
+          <div class="inline-block p-2 rounded-lg bg-gray-800/50">
+            <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+      
+      // Fetch chat history from API
+      fetch(`/api/chat/messages/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load chat history');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          displayChatMessages(data.messages);
+        } else {
+          throw new Error(data.message || 'Failed to load chat history');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading chat history:', error);
+        chatMessages.innerHTML = `
+          <div class="text-center my-4">
+            <p class="text-text-dim">Failed to load chat history. Please try again later.</p>
+          </div>
+        `;
+      });
+    }
+    
+    // Connect to WebSocket server
+    function connectWebSocket() {
+      // Close existing connection if any
+      if (chatSocket && chatSocket.readyState !== WebSocket.CLOSED) {
+        chatSocket.close();
+      }
+      
+      // Create new WebSocket connection
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.hostname;
+      const wsPort = 8765; // Use the port defined in chat_server.py
+      
+      chatSocket = new WebSocket(`${wsProtocol}//${wsHost}:${wsPort}`);
+      
+      // Connection opened
+      chatSocket.addEventListener('open', function(event) {
+        console.log('WebSocket connection established');
+        
+        // Update connection status UI
+        const connectionStatus = document.getElementById('connection-status');
+        if (connectionStatus) {
+          connectionStatus.classList.remove('hidden');
+        }
+        
+        // Send connection message with user and project info
+        sendWebSocketMessage({
+          type: 'connect',
+          user_id: currentUserId,
+          project_id: currentProjectId,
+          user_name: currentUserName
+        });
+      });
+      
+      // Listen for messages
+      chatSocket.addEventListener('message', function(event) {
+        const message = JSON.parse(event.data);
+        handleIncomingMessage(message);
+      });
+      
+      // Connection closed
+      chatSocket.addEventListener('close', function(event) {
+        console.log('WebSocket connection closed');
+        
+        // Update connection status UI
+        const connectionStatus = document.getElementById('connection-status');
+        if (connectionStatus) {
+          connectionStatus.classList.add('hidden');
+        }
+        
+        // Attempt to reconnect after a delay
+        setTimeout(() => {
+          if (document.getElementById('chat-sidebar') && !document.getElementById('chat-sidebar').classList.contains('translate-x-full')) {
+            connectWebSocket();
+          }
+        }, 3000);
+      });
+      
+      // Connection error
+      chatSocket.addEventListener('error', function(event) {
+        console.error('WebSocket error:', event);
+        // Handle connection errors
+      });
+    }
+    
+    // Send message through WebSocket
+    function sendWebSocketMessage(message) {
+      if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        // Encrypt message content if it's a regular chat message
+        if (message.type === 'message' && message.content) {
+          message.encrypted = true;
+          // Store original content for local display
+          const originalContent = message.content;
+          // Encrypt the message content
+          message.content = ChatE2EE.encrypt(message.content);
+          
+          // Send the encrypted message
+          chatSocket.send(JSON.stringify(message));
+          
+          // For better UX, we can simulate the message locally with original content
+          // This avoids having to decrypt our own messages
+          const localMessage = {
+            type: 'message',
+            sender_id: currentUserId,
+            sender_name: currentUserName,
+            content: originalContent,
+            timestamp: new Date().toISOString().replace('T', ' ').substr(0, 19),
+            project_id: currentProjectId
+          };
+          
+          // Add message to the chat locally (skip broadcast handling)
+          appendMessageToChat(localMessage);
+        } else {
+          // Send non-chat messages (like connect) without encryption
+          chatSocket.send(JSON.stringify(message));
+        }
+      } else {
+        console.error('WebSocket is not connected');
+      }
+    }
+    
+    // Handle incoming message from WebSocket
+    function handleIncomingMessage(message) {
+      console.log('Received message:', message);
+      
+      // Check if the message is for the current project
+      if (message.project_id && message.project_id.toString() !== currentProjectId.toString()) {
+        console.log('Message is for a different project, ignoring');
+        return;
+      }
+      
+      // Decrypt message content if it's encrypted
+      if (message.type === 'message' && message.encrypted && message.content) {
+        // Don't decrypt our own messages (we already show them with original content)
+        if (message.sender_id !== currentUserId) {
+          try {
+            message.content = ChatE2EE.decrypt(message.content);
+          } catch (error) {
+            console.error('Failed to decrypt message:', error);
+            message.content = '🔒 [Encrypted message - unable to decrypt]';
+          }
+        }
+      }
+      
+      // Add message to the chat
+      appendMessageToChat(message);
+      
+      // Save the message to the database (for non-system messages only)
+      if (message.type === 'message' && message.sender_id === currentUserId) {
+        // If the message is encrypted, we need to save it encrypted
+        const contentToSave = message.encrypted ? message.content : message.content;
+        saveChatMessage(contentToSave);
+      }
+    }
+    
+    // Display chat messages in the UI
+    function displayChatMessages(messages) {
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = '';
+      
+      if (!messages || messages.length === 0) {
+        chatMessages.innerHTML = `
+          <div class="text-center my-4">
+            <p class="text-text-dim">No messages yet. Start the conversation!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Group messages by date
+      const messagesByDate = {};
+      
+      // Process messages - decrypt any encrypted messages
+      messages.forEach(message => {
+        // Check if this is an encrypted message
+        if (message.type === 'message' && message.content && ChatE2EE.isEncrypted(message.content)) {
+          try {
+            message.content = ChatE2EE.decrypt(message.content);
+          } catch (error) {
+            console.error('Failed to decrypt message from history:', error);
+            message.content = '🔒 [Encrypted message - unable to decrypt]';
+          }
+        }
+        
+        const messageDate = message.timestamp.split(' ')[0]; // Get date part
+        if (!messagesByDate[messageDate]) {
+          messagesByDate[messageDate] = [];
+        }
+        messagesByDate[messageDate].push(message);
+      });
+      
+      // Display messages grouped by date
+      for (const date in messagesByDate) {
+        // Add date separator
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        
+        let dateLabel = date;
+        if (date === today) {
+          dateLabel = 'Today';
+        } else if (date === yesterday) {
+          dateLabel = 'Yesterday';
+        }
+        
+        chatMessages.innerHTML += `
+          <div class="text-center my-2">
+            <span class="text-xs text-text-dim bg-gray-800/50 px-2 py-1 rounded-full">${dateLabel}</span>
+          </div>
+        `;
+        
+        // Add messages for this date
+        messagesByDate[date].forEach(message => {
+          appendMessageToChat(message);
+        });
+      }
+      
+      // Scroll to bottom
+      scrollChatToBottom();
+    }
+    
+    // Append a single message to the chat
+    function appendMessageToChat(message) {
+      const chatMessages = document.getElementById('chat-messages');
+      
+      // Don't add if there's no chat container
+      if (!chatMessages) return;
+      
+      // Extract time from timestamp
+      let timeString = '';
+      if (message.timestamp) {
+        const parts = message.timestamp.split(' ');
+        if (parts.length > 1) {
+          timeString = parts[1]; // Get time part
+          // Format to 12-hour time if needed
+          const timeParts = timeString.split(':');
+          if (timeParts.length > 1) {
+            const hour = parseInt(timeParts[0]);
+            const minute = timeParts[1];
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            timeString = `${hour12}:${minute} ${ampm}`;
+          }
+        }
+      }
+      
+      // Create message HTML based on message type
+      let messageHTML = '';
+      
+      // System message
+      if (message.type === 'system') {
+        messageHTML = `
+          <div class="text-center my-2">
+            <span class="text-xs text-text-dim bg-gray-800/70 px-3 py-1 rounded-full">${message.content}</span>
+          </div>
+        `;
+      }
+      // Regular message from another user
+      else if (message.sender_id !== currentUserId) {
+        // Get initials for avatar
+        const senderName = message.sender_name || 'Unknown';
+        const nameParts = senderName.split(' ');
+        const initials = nameParts.length > 1 
+          ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+          : senderName[0].toUpperCase();
+        
+        messageHTML = `
+          <div class="flex items-start">
+            <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2 flex-shrink-0">${initials}</div>
+            <div class="glass-card border border-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+              <div class="text-xs text-text-dim mb-1">${senderName}</div>
+              <p class="text-sm text-text-light">${message.content}</p>
+              <div class="text-xs text-text-dim mt-1 text-right">${timeString}</div>
+            </div>
+          </div>
+        `;
+      }
+      // Message from current user
+      else {
+        // Get initials for avatar
+        const nameParts = currentUserName.split(' ');
+        const initials = nameParts.length > 1 
+          ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+          : currentUserName[0].toUpperCase();
+        
+        messageHTML = `
+          <div class="flex items-start justify-end">
+            <div class="glass-card border border-primary/30 bg-primary/10 p-3 rounded-lg rounded-tr-none max-w-[85%]">
+              <p class="text-sm text-text-light">${message.content}</p>
+              <div class="text-xs text-text-dim mt-1 text-right">${timeString}</div>
+            </div>
+            <div class="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs ml-2 flex-shrink-0">${initials}</div>
+          </div>
+        `;
+      }
+      
+      // Append message to chat
+      chatMessages.innerHTML += messageHTML;
+      
+      // Scroll to bottom
+      scrollChatToBottom();
+    }
+    
+    // Scroll chat to bottom
+    function scrollChatToBottom() {
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+    
+    // Set up chat form submission handler
+    function setupChatForm() {
+      const chatForm = document.getElementById('chat-form');
+      const chatInput = document.getElementById('chat-input');
+      
+      if (!chatForm || !chatInput) return;
+      
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Clear input
+        chatInput.value = '';
+        
+        // Send message through WebSocket
+        sendWebSocketMessage({
+          type: 'message',
+          content: message
+        });
+      });
+    }
+    
+    // Save chat message to the database
+    function saveChatMessage(content) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+      
+      fetch(`/api/chat/messages/${currentProjectId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: content,
+          type: 'message',
+          encrypted: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success) {
+          console.error('Failed to save message:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving message:', error);
+      });
+    }
+  </script>
+
+  <!-- Add Chat Sidebar right before the closing body tag -->
+  
+  <!-- Chat Sidebar with increased width and fixed close button -->
+  <div id="chat-sidebar" class="fixed top-0 right-0 h-screen w-96 bg-dark-card border-l border-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50">
+    <div class="flex flex-col h-full">
+      <!-- Chat Header -->
+      <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-text-light">Project Chat</h3>
+        <button id="close-chat" class="text-text-dim hover:text-text-light p-2" onclick="closeChatSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Chat Messages -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+        <!-- Chat messages will be loaded/inserted here dynamically -->
+        <div class="text-center">
+          <div class="inline-block p-2 rounded-lg bg-gray-800/50">
+            <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Input -->
+      <div class="p-4 border-t border-gray-800">
+        <form id="chat-form" class="flex items-center">
+          <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-gray-800/50 text-text-light border border-gray-700 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary">
+          <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </form>
+        <div id="connection-status" class="text-xs text-text-dim mt-2 text-center hidden">
+          <span class="inline-block w-2 h-2 rounded-full bg-success"></span> Connected
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- After DOM content is loaded, initialize the page -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded event fired in view-project.html');
+      // Get project ID from URL and load project data
+      const projectId = getQueryParam('id');
+      if (!projectId) {
+        showAlert('Project ID is required', 'error');
+        return;
+      }
+      
+      // Load the project data
+      loadProjectData(projectId);
+      
+      // Setup all event listeners
+      console.log('About to call setupEventListeners in view-project.html');
+      setupEventListeners();
+      console.log('setupEventListeners called in view-project.html');
+    });
+  </script>
+</body>
+  
+  <!-- Direct click handler for chat link -->
+  <script>
+    // Add a direct click handler to the chat link
+    window.addEventListener('load', function() {
+      console.log('Window load event fired in view-project.html');
+      const chatLink = document.getElementById('chat-link');
+      console.log('Direct chat link handler - Chat link element in view-project.html:', chatLink);
+      
+      if (chatLink) {
+        console.log('Adding direct click handler to chat link in view-project.html');
+        chatLink.onclick = function(e) {
+          console.log('Direct chat link clicked in view-project.html');
+          e.preventDefault();
+          
+          // Get the chat sidebar directly
+          const chatSidebar = document.getElementById('chat-sidebar');
+          console.log('Direct handler - Chat sidebar element in view-project.html:', chatSidebar);
+          
+          if (chatSidebar) {
+            console.log('Directly removing translate-x-full class in view-project.html');
+            chatSidebar.classList.remove('translate-x-full');
+            console.log('Current classes after direct removal in view-project.html:', chatSidebar.className);
+          } else {
+            console.error('Chat sidebar element not found in direct handler in view-project.html');
+          }
+          
+          return false;
+        };
+        console.log('Direct click handler added to chat link in view-project.html');
+      } else {
+        console.error('Chat link not found in direct handler in view-project.html');
+      }
+      
+      // Add direct close button handler
+      const closeButton = document.getElementById('close-chat');
+      console.log('Close chat button in load handler:', closeButton);
+      
+      if (closeButton) {
+        console.log('Adding direct click handler to close button');
+        closeButton.onclick = function(e) {
+          console.log('Direct close button clicked');
+          e.preventDefault();
+          
+          // Get the chat sidebar directly
+          const chatSidebar = document.getElementById('chat-sidebar');
+          console.log('Chat sidebar from close button handler:', chatSidebar);
+          
+          if (chatSidebar) {
+            console.log('Adding translate-x-full class from close button');
+            chatSidebar.classList.add('translate-x-full');
+            console.log('Classes after adding translate-x-full:', chatSidebar.className);
+          } else {
+            console.error('Chat sidebar not found in close button handler');
+          }
+          
+          return false;
+        };
+        console.log('Direct click handler added to close button');
+      } else {
+        console.error('Close button not found in load handler');
+      }
+    });
+  </script>
+  
+  <!-- Add CryptoJS library for encryption -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- E2EE (End-to-End Encryption) Module -->
+  <script>
+    // E2EE Module for chat encryption
+    const ChatE2EE = (function() {
+      // Private variables
+      let _encryptionKey = null;
+      
+      // Generate project-specific key using project ID and a salt
+      // This is a simple implementation - in production, use more secure key exchange
+      function generateProjectKey(projectId) {
+        // For simplicity, we derive a key from the project ID
+        // In a real app, you'd use a secure key exchange protocol
+        const salt = "ProjectHub-E2EE-Salt"; // Add randomness
+        return CryptoJS.PBKDF2(projectId.toString(), salt, {
+          keySize: 256/32, // 256 bits
+          iterations: 1000
+        }).toString();
+      }
+      
+      // Initialize encryption for a project
+      function init(projectId) {
+        _encryptionKey = generateProjectKey(projectId);
+        console.log("E2EE encryption initialized for project", projectId);
+        return _encryptionKey;
+      }
+      
+      // Encrypt a message
+      function encryptMessage(plaintext) {
+        if (!_encryptionKey) {
+          console.error("Encryption key not initialized");
+          return null;
+        }
+        
+        try {
+          // Use AES encryption with GCM mode (authenticated encryption)
+          // Generate a random IV for each message
+          const iv = CryptoJS.lib.WordArray.random(16); // 128 bits
+          
+          // Encrypt the message
+          const encrypted = CryptoJS.AES.encrypt(plaintext, _encryptionKey, {
+            iv: iv,
+            mode: CryptoJS.mode.GCM,
+            padding: CryptoJS.pad.Pkcs7
+          });
+          
+          // Combine IV and ciphertext for transmission
+          // Format: base64(iv):base64(ciphertext)
+          return iv.toString(CryptoJS.enc.Base64) + ":" + encrypted.toString();
+        } catch (error) {
+          console.error("Encryption error:", error);
+          return null;
+        }
+      }
+      
+      // Decrypt a message
+      function decryptMessage(encryptedMessage) {
+        if (!_encryptionKey) {
+          console.error("Encryption key not initialized");
+          return null;
+        }
+        
+        try {
+          // Split the message into IV and ciphertext
+          const parts = encryptedMessage.split(":");
+          if (parts.length !== 2) {
+            throw new Error("Invalid encrypted message format");
+          }
+          
+          const iv = CryptoJS.enc.Base64.parse(parts[0]);
+          const ciphertext = parts[1];
+          
+          // Decrypt the message
+          const decrypted = CryptoJS.AES.decrypt(ciphertext, _encryptionKey, {
+            iv: iv,
+            mode: CryptoJS.mode.GCM,
+            padding: CryptoJS.pad.Pkcs7
+          });
+          
+          return decrypted.toString(CryptoJS.enc.Utf8);
+        } catch (error) {
+          console.error("Decryption error:", error);
+          return "🔒 [Encrypted message - unable to decrypt]";
+        }
+      }
+      
+      // Check if a message is encrypted (has the format iv:ciphertext)
+      function isEncrypted(message) {
+        return typeof message === 'string' && message.indexOf(':') > 0;
+      }
+      
+      // Public API
+      return {
+        init: init,
+        encrypt: encryptMessage,
+        decrypt: decryptMessage,
+        isEncrypted: isEncrypted
+      };
+    })();
+  </script>
+
+  <!-- Chat WebSocket Script -->
+  <script>
+    // Chat WebSocket functionality
+    let chatSocket = null;
+    let currentProjectId = null;
+    let currentUserId = null;
+    let currentUserName = null;
+    
+    // Initialize chat functionality
+    function initializeChat(projectId) {
+      // Store the current project ID
+      currentProjectId = projectId;
+      
+      // Get user information from localStorage/sessionStorage
+      const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+      currentUserId = userData.id;
+      currentUserName = userData.name;
+      
+      if (!currentUserId || !currentUserName) {
+        console.error('User data not found in storage');
+        return;
+      }
+      
+      // Initialize end-to-end encryption for this project
+      ChatE2EE.init(projectId);
+      console.log('End-to-end encryption initialized for project', projectId);
+      
+      // Load chat history from the server
+      loadChatHistory(projectId);
+      
+      // Connect to WebSocket server
+      connectWebSocket();
+      
+      // Set up chat form submission handler
+      setupChatForm();
+      
+      // Add encryption status indicator to the chat header
+      const chatHeader = document.querySelector('#chat-sidebar .flex.justify-between');
+      if (chatHeader) {
+        const encryptionIndicator = document.createElement('div');
+        encryptionIndicator.className = 'text-xs px-2 py-1 bg-green-800/30 text-green-400 rounded-full flex items-center';
+        encryptionIndicator.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>E2E Encrypted';
+        chatHeader.appendChild(encryptionIndicator);
+      }
+    }
+    
+    // Load chat history from the server
+    function loadChatHistory(projectId) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        showAlert('Authentication required', 'error');
+        return;
+      }
+      
+      // Clear chat messages container
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = `
+        <div class="text-center">
+          <div class="inline-block p-2 rounded-lg bg-gray-800/50">
+            <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+      `;
+      
+      // Fetch chat history from API
+      fetch(`/api/chat/messages/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load chat history');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          displayChatMessages(data.messages);
+        } else {
+          throw new Error(data.message || 'Failed to load chat history');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading chat history:', error);
+        chatMessages.innerHTML = `
+          <div class="text-center my-4">
+            <p class="text-text-dim">Failed to load chat history. Please try again later.</p>
+          </div>
+        `;
+      });
+    }
+    
+    // Connect to WebSocket server
+    function connectWebSocket() {
+      // Close existing connection if any
+      if (chatSocket && chatSocket.readyState !== WebSocket.CLOSED) {
+        chatSocket.close();
+      }
+      
+      // Create new WebSocket connection
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.hostname;
+      const wsPort = 8765; // Use the port defined in chat_server.py
+      
+      chatSocket = new WebSocket(`${wsProtocol}//${wsHost}:${wsPort}`);
+      
+      // Connection opened
+      chatSocket.addEventListener('open', function(event) {
+        console.log('WebSocket connection established');
+        
+        // Update connection status UI
+        const connectionStatus = document.getElementById('connection-status');
+        if (connectionStatus) {
+          connectionStatus.classList.remove('hidden');
+        }
+        
+        // Send connection message with user and project info
+        sendWebSocketMessage({
+          type: 'connect',
+          user_id: currentUserId,
+          project_id: currentProjectId,
+          user_name: currentUserName
+        });
+      });
+      
+      // Listen for messages
+      chatSocket.addEventListener('message', function(event) {
+        const message = JSON.parse(event.data);
+        handleIncomingMessage(message);
+      });
+      
+      // Connection closed
+      chatSocket.addEventListener('close', function(event) {
+        console.log('WebSocket connection closed');
+        
+        // Update connection status UI
+        const connectionStatus = document.getElementById('connection-status');
+        if (connectionStatus) {
+          connectionStatus.classList.add('hidden');
+        }
+        
+        // Attempt to reconnect after a delay
+        setTimeout(() => {
+          if (document.getElementById('chat-sidebar') && !document.getElementById('chat-sidebar').classList.contains('translate-x-full')) {
+            connectWebSocket();
+          }
+        }, 3000);
+      });
+      
+      // Connection error
+      chatSocket.addEventListener('error', function(event) {
+        console.error('WebSocket error:', event);
+        // Handle connection errors
+      });
+    }
+    
+    // Send message through WebSocket
+    function sendWebSocketMessage(message) {
+      if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        // Encrypt message content if it's a regular chat message
+        if (message.type === 'message' && message.content) {
+          message.encrypted = true;
+          // Store original content for local display
+          const originalContent = message.content;
+          // Encrypt the message content
+          message.content = ChatE2EE.encrypt(message.content);
+          
+          // Send the encrypted message
+          chatSocket.send(JSON.stringify(message));
+          
+          // For better UX, we can simulate the message locally with original content
+          // This avoids having to decrypt our own messages
+          const localMessage = {
+            type: 'message',
+            sender_id: currentUserId,
+            sender_name: currentUserName,
+            content: originalContent,
+            timestamp: new Date().toISOString().replace('T', ' ').substr(0, 19),
+            project_id: currentProjectId
+          };
+          
+          // Add message to the chat locally (skip broadcast handling)
+          appendMessageToChat(localMessage);
+        } else {
+          // Send non-chat messages (like connect) without encryption
+          chatSocket.send(JSON.stringify(message));
+        }
+      } else {
+        console.error('WebSocket is not connected');
+      }
+    }
+    
+    // Handle incoming message from WebSocket
+    function handleIncomingMessage(message) {
+      console.log('Received message:', message);
+      
+      // Check if the message is for the current project
+      if (message.project_id && message.project_id.toString() !== currentProjectId.toString()) {
+        console.log('Message is for a different project, ignoring');
+        return;
+      }
+      
+      // Decrypt message content if it's encrypted
+      if (message.type === 'message' && message.encrypted && message.content) {
+        // Don't decrypt our own messages (we already show them with original content)
+        if (message.sender_id !== currentUserId) {
+          try {
+            message.content = ChatE2EE.decrypt(message.content);
+          } catch (error) {
+            console.error('Failed to decrypt message:', error);
+            message.content = '🔒 [Encrypted message - unable to decrypt]';
+          }
+        }
+      }
+      
+      // Add message to the chat
+      appendMessageToChat(message);
+      
+      // Save the message to the database (for non-system messages only)
+      if (message.type === 'message' && message.sender_id === currentUserId) {
+        // If the message is encrypted, we need to save it encrypted
+        const contentToSave = message.encrypted ? message.content : message.content;
+        saveChatMessage(contentToSave);
+      }
+    }
+    
+    // Display chat messages in the UI
+    function displayChatMessages(messages) {
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = '';
+      
+      if (!messages || messages.length === 0) {
+        chatMessages.innerHTML = `
+          <div class="text-center my-4">
+            <p class="text-text-dim">No messages yet. Start the conversation!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Group messages by date
+      const messagesByDate = {};
+      
+      // Process messages - decrypt any encrypted messages
+      messages.forEach(message => {
+        // Check if this is an encrypted message
+        if (message.type === 'message' && message.content && ChatE2EE.isEncrypted(message.content)) {
+          try {
+            message.content = ChatE2EE.decrypt(message.content);
+          } catch (error) {
+            console.error('Failed to decrypt message from history:', error);
+            message.content = '🔒 [Encrypted message - unable to decrypt]';
+          }
+        }
+        
+        const messageDate = message.timestamp.split(' ')[0]; // Get date part
+        if (!messagesByDate[messageDate]) {
+          messagesByDate[messageDate] = [];
+        }
+        messagesByDate[messageDate].push(message);
+      });
+      
+      // Display messages grouped by date
+      for (const date in messagesByDate) {
+        // Add date separator
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        
+        let dateLabel = date;
+        if (date === today) {
+          dateLabel = 'Today';
+        } else if (date === yesterday) {
+          dateLabel = 'Yesterday';
+        }
+        
+        chatMessages.innerHTML += `
+          <div class="text-center my-2">
+            <span class="text-xs text-text-dim bg-gray-800/50 px-2 py-1 rounded-full">${dateLabel}</span>
+          </div>
+        `;
+        
+        // Add messages for this date
+        messagesByDate[date].forEach(message => {
+          appendMessageToChat(message);
+        });
+      }
+      
+      // Scroll to bottom
+      scrollChatToBottom();
+    }
+    
+    // Append a single message to the chat
+    function appendMessageToChat(message) {
+      const chatMessages = document.getElementById('chat-messages');
+      
+      // Don't add if there's no chat container
+      if (!chatMessages) return;
+      
+      // Extract time from timestamp
+      let timeString = '';
+      if (message.timestamp) {
+        const parts = message.timestamp.split(' ');
+        if (parts.length > 1) {
+          timeString = parts[1]; // Get time part
+          // Format to 12-hour time if needed
+          const timeParts = timeString.split(':');
+          if (timeParts.length > 1) {
+            const hour = parseInt(timeParts[0]);
+            const minute = timeParts[1];
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            timeString = `${hour12}:${minute} ${ampm}`;
+          }
+        }
+      }
+      
+      // Create message HTML based on message type
+      let messageHTML = '';
+      
+      // System message
+      if (message.type === 'system') {
+        messageHTML = `
+          <div class="text-center my-2">
+            <span class="text-xs text-text-dim bg-gray-800/70 px-3 py-1 rounded-full">${message.content}</span>
+          </div>
+        `;
+      }
+      // Regular message from another user
+      else if (message.sender_id !== currentUserId) {
+        // Get initials for avatar
+        const senderName = message.sender_name || 'Unknown';
+        const nameParts = senderName.split(' ');
+        const initials = nameParts.length > 1 
+          ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+          : senderName[0].toUpperCase();
+        
+        messageHTML = `
+          <div class="flex items-start">
+            <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs mr-2 flex-shrink-0">${initials}</div>
+            <div class="glass-card border border-gray-800 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+              <div class="text-xs text-text-dim mb-1">${senderName}</div>
+              <p class="text-sm text-text-light">${message.content}</p>
+              <div class="text-xs text-text-dim mt-1 text-right">${timeString}</div>
+            </div>
+          </div>
+        `;
+      }
+      // Message from current user
+      else {
+        // Get initials for avatar
+        const nameParts = currentUserName.split(' ');
+        const initials = nameParts.length > 1 
+          ? (nameParts[0][0] + nameParts[nameParts.length-1][0]).toUpperCase() 
+          : currentUserName[0].toUpperCase();
+        
+        messageHTML = `
+          <div class="flex items-start justify-end">
+            <div class="glass-card border border-primary/30 bg-primary/10 p-3 rounded-lg rounded-tr-none max-w-[85%]">
+              <p class="text-sm text-text-light">${message.content}</p>
+              <div class="text-xs text-text-dim mt-1 text-right">${timeString}</div>
+            </div>
+            <div class="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary text-xs ml-2 flex-shrink-0">${initials}</div>
+          </div>
+        `;
+      }
+      
+      // Append message to chat
+      chatMessages.innerHTML += messageHTML;
+      
+      // Scroll to bottom
+      scrollChatToBottom();
+    }
+    
+    // Scroll chat to bottom
+    function scrollChatToBottom() {
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+    
+    // Set up chat form submission handler
+    function setupChatForm() {
+      const chatForm = document.getElementById('chat-form');
+      const chatInput = document.getElementById('chat-input');
+      
+      if (!chatForm || !chatInput) return;
+      
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Clear input
+        chatInput.value = '';
+        
+        // Send message through WebSocket
+        sendWebSocketMessage({
+          type: 'message',
+          content: message
+        });
+      });
+    }
+    
+    // Save chat message to the database
+    function saveChatMessage(content) {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+      
+      fetch(`/api/chat/messages/${currentProjectId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: content,
+          type: 'message',
+          encrypted: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success) {
+          console.error('Failed to save message:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving message:', error);
+      });
+    }
+    
+    // Initialize chat when project is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded event fired in chat module');
+      
+      // Get project ID from URL
+      const projectId = getQueryParam('id');
+      if (projectId) {
+        // Wait a bit for other components to load
+        setTimeout(() => {
+          initializeChat(projectId);
+        }, 1000);
+      }
+    });
+    
+    // Close WebSocket when leaving the page
+    window.addEventListener('beforeunload', function() {
+      if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        chatSocket.close();
+      }
+    });
+  </script>
+  </html>
+
